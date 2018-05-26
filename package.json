@@ -1,0 +1,29 @@
+{
+	"name": "will",
+	"version": "0.0.1",
+	"description": "An intelligencer with stronger will",
+	"keywords": [
+		"artificial-intelligence",
+		"ai",
+		"mastodon",
+		"mastodon-bot"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/GenbuHase/Will.git"
+	},
+	"bugs": {
+		"url": "https://github.com/GenbuHase/Will/issues"
+	},
+	"homepage": "https://github.com/GenbuHase/Will#readme",
+	"author": {
+		"name": "Genbu Hase",
+		"url": "https://genbuhase.github.io/"
+	},
+	"license": "MIT",
+	"main": "index.js",
+	"scripts": {
+		"start": "node index.js",
+		"debug": "node inspect index.js"
+	}
+}
