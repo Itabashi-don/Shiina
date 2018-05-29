@@ -1,7 +1,7 @@
 {
-	"name": "will",
+	"name": "shiina-with-will",
 	"version": "0.0.1",
-	"description": "An intelligencer with stronger will",
+	"description": "A girl in Itabashi powered by Will(An intelligencer with stronger will)",
 	"keywords": [
 		"artificial-intelligence",
 		"ai",
@@ -10,12 +10,12 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/GenbuHase/Will.git"
+		"url": "git+https://github.com/Itabashi-don/Shiina.git"
 	},
 	"bugs": {
-		"url": "https://github.com/GenbuHase/Will/issues"
+		"url": "https://github.com/Itabashi-don/Shiina/issues"
 	},
-	"homepage": "https://github.com/GenbuHase/Will#readme",
+	"homepage": "https://github.com/Itabashi-don/Shiina#readme",
 	"author": {
 		"name": "Genbu Hase",
 		"url": "https://genbuhase.github.io/"

@@ -1,23 +1,34 @@
-# Will
+# <Img Src="/Shiina.jpg" Height="48" Align="Center"/> Shiina(Powered by Will)
 
-An intelligencer with stronger will
+I'm a girl, named "Shiina", living in Itabashi.
+
+
+## Languages
+* [Japanese](/README[Japanese].md)
 
 
 ## Description
-I'm kind of artificial intelligence.<Br />
-This project is for investigation and education, so there would be a lot of bugs.
+Hello, I'm Shiina.
+Please feel free to call me "Shii-cyan" :D
+
+※This project is for investigation and education, so there would be a lot of bugs.
 
 
 ## Features
-* A stronger will based on behavior of users
+* A stronger will based on behavior of users, with talking with anyone
 
 
 ## Requirement
 * [Node.js](https://nodejs.org)
+* [Heroku](https://heroku.com)
 
 
 ## Author
-[Genbu Hase](https://github.com/GenbuHase)
+* Genbu Hase
+  * [Github](https://github.com/GenbuHase)
+  * [Mastodon(itabashi.0j0.jp)](https://itabashi.0j0.jp/@ProgrammerGenboo)
+  * [Mastodon(knzk.me)](https://knzk.me/@ProgrammerGenboo)
+  * [Google+](https://plus.google.com/106666684430101995501)
 
 
 ## License
