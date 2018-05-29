@@ -8,7 +8,7 @@ I'm a girl, named "Shiina", living in Itabashi.
 
 
 ## Description
-Hello, I'm Shiina.
+Hello, I'm Shiina.<Br />
 Please feel free to call me "Shii-cyan" :D
 
 ※This project is for investigation and education, so there would be a lot of bugs.
