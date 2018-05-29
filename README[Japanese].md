@@ -1,4 +1,5 @@
-# <Img Src="/Shiina.jpg" Height="48" Align="Center"/> しいな - Shiina(Powered by Will)
+# <Img Alt="" Src="/assets/Shiina-icon.jpg" Height="48" Align="Center"/> しいな ― Shiina(Powered by Will)
+![](/assets/Shiina.jpg)
 
 板橋在住の女子高生、しいちゃんです。
 
