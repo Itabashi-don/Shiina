@@ -7,7 +7,7 @@
 		{
 			"type": "node",
 			"request": "launch",
-			"name": "Hi, Ms.Will",
+			"name": "しいちゃん、おはよっ！！",
 			"program": "${workspaceFolder}\\index.js"
 		}
 	]
