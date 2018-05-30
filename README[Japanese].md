@@ -25,11 +25,13 @@
 
 
 ## 両親紹介っ！ | Author
-* Genbu Hase
+* Genbu Hase (メインデベロッパー)
   * [Github](https://github.com/GenbuHase)
   * [Mastodon(板橋丼 | itabashi.0j0.jp)](https://itabashi.0j0.jp/@ProgrammerGenboo)
   * [Mastodon(神崎丼 | knzk.me)](https://knzk.me/@ProgrammerGenboo)
   * [Google+](https://plus.google.com/106666684430101995501)
+
+* Anonymous (キャラクターデザイナー)
 
 
 ## 決まり事っ！ | License

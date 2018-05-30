@@ -25,11 +25,13 @@ Please feel free to call me "Shii-cyan" :D
 
 
 ## Author
-* Genbu Hase
+* Genbu Hase (Main developer)
   * [Github](https://github.com/GenbuHase)
   * [Mastodon(itabashi.0j0.jp)](https://itabashi.0j0.jp/@ProgrammerGenboo)
   * [Mastodon(knzk.me)](https://knzk.me/@ProgrammerGenboo)
   * [Google+](https://plus.google.com/106666684430101995501)
+
+* Anonymous (Character designer)
 
 
 ## License
