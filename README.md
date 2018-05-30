@@ -1,4 +1,4 @@
-# <Img Alt="" Src="/assets/Shiina-icon.jpg" Height="48" Align="Center"/> Shiina(Powered by Will)
+# Shiina(Powered by Will)
 ![](/assets/Shiina.jpg)
 
 I'm a girl, named "Shiina", living in Itabashi.
