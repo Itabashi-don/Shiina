@@ -47,7 +47,7 @@ let app = express();
 	app.set("PORT", process.env.PORT || 8001);
 
 app.listen(app.get("PORT"), () => {
-	console.log(`[Will] おはよーっ！！ポート${app.get("PORT")}で待ってるねっ♡(´˘\`๑)`);
+	console.log(`[Shiina] おはよーっ！！ポート${app.get("PORT")}で待ってるねっ♡(´˘\`๑)`);
 
 	/*mstdn.post("statuses", {
 		status: "板橋の民おはよっ！！"
