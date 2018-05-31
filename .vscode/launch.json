@@ -11,7 +11,8 @@
 			"program": "${workspaceFolder}\\index.js",
 
 			"env": {
-				"MODE": "development"
+				"ENV": "development",
+				"MODE": "study"
 			}
 		}
 	]
