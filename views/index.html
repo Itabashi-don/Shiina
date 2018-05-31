@@ -1,0 +1,44 @@
+<!DocType HTML>
+
+<HTML>
+	<Head>
+		<Meta Charset = "UTF-8" />
+		<Title>Tokenizer(For debugging)</Title>
+
+		<Script Src = "main.js" Defer></Script>
+	</Head>
+
+	<Body>
+		<Form ID = "tokenize">
+			<Textarea ID = "tokenize-content" Placeholder = "文章を入力してください"></Textarea>
+			<Input ID = "tokenize-apply" Type = "Button" Value = "分解！" />
+		</Form>
+
+		<Form ID = "log">
+			<Select ID = "log-type">
+				<Option Value = "名詞">名詞</Option>
+				<Option Value = "動詞">動詞</Option>
+				<Option Value = "形容詞">形容詞</Option>
+				<Option Value = "副詞">副詞</Option>
+				<Option Value = "連体詞">連体詞</Option>
+				<Option Value = "助詞">助詞</Option>
+				<Option Value = "助動詞">助動詞</Option>
+				<Option Value = "接続詞">接続詞</Option>
+				<Option Value = "感動詞">感動詞</Option>
+				<Option Value = "接頭詞">接頭詞</Option>
+				<Option Value = "フィラー">フィラー</Option>
+				<Option Value = "記号">記号</Option>
+				<Option Value = "その他">その他</Option>
+
+				<Option Value = "whole">whole</Option>
+			</Select>
+
+			<Input ID = "log-apply" Type = "Button" Value = "取得！" />
+		</Form>
+
+		<Form ID = "markov">
+			<Input ID = "markov-amount" Type = "Number" Value = "10" />件生成
+			<Input ID = "markov-apply" Type = "Button" Value = "生成！" />
+		</Form>
+	</Body>
+</HTML>
