@@ -6,8 +6,17 @@ const Status = require("./models/Status");
 const MorphableStatus = require("./models/MorphableStatus");
 const Notification = require("./models/Notification");
 
-//For developing
+
+
+//Initialization of environments
+process.env.ENV = process.env.ENV || "production";
+process.env.MODE = process.env.MODE || "";
+
 if (process.env.ENV == "development") require("dotenv").config();
+
+if (!process.env.INSTANCE) throw new TypeError("An environment, 'INSTANCE' is required.");
+if (!process.env.TOKEN) throw new TypeError("An environment, 'TOKEN' is required.");
+
 
 
 if (!fs.existsSync("logs/whole.log")) fs.appendFileSync("logs/whole.log", "[]");
@@ -84,7 +93,7 @@ let app = express();
 
 		fs.readFile(logPath, (error, log) => {
 			if (error) throw error;
-
+			
 			res.end(log);
 		});
 	});
