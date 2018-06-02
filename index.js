@@ -106,18 +106,15 @@ let app = express();
 
 app.listen(app.get("PORT"), () => {
 	console.log(`[Shiina] おはよーっ！！ポート${app.get("PORT")}で待ってるねっ♡(´˘\`๑)`);
-
-	/*mstdn.post("statuses", {
-		status: "板橋の民おはよっ！！"
-	});*/
-
-	if (process.env.MODE === "study") {
+	
+	if (!process.env.MODE) {
+		/*mstdn.post("statuses", {
+			status: "板橋の民おはよっ！！"
+		});*/
+	} else if (process.env.MODE === "study") {
 		mstdn.post("statuses", {
 			status: "学習開始っ！！",
-			visibility: "unlisted",
-
-			isEnquete: false,
-			enquete_items: ["", "", "", ""]
+			visibility: "unlisted"
 		});
 	}
 });
