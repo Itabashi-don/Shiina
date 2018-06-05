@@ -41,21 +41,23 @@ let homeTimeline = mstdn.stream(process.env.MODE === "study" ? "streaming/public
 
 	homeTimeline.on("message", stream => {
 		//See https://github.com/tootsuite/documentation/blob/master/Using-the-API/Streaming-API.md#event-types
-		if (stream.event === "update" && process.env.MODE === "study" && tokenizer) {
-			const status = new MorphableStatus(stream.data);
-			console.log(status);
+		if (process.env.MODE === "study") {
+			if (stream.event === "update" && tokenizer) {
+				const status = new MorphableStatus(stream.data);
+				console.log(status);
 
-			if (status.language !== "ja") return;
+				if (status.language !== "ja") return;
 
-			const tokenized = tokenizer.tokenize(status.morphableContent);
-			wholeLog.push(tokenized);
+				const tokenized = tokenizer.tokenize(status.morphableContent);
+				wholeLog.push(tokenized);
 
-			fs.writeFileSync("logs/whole.log", JSON.stringify(wholeLog));
-			return;
+				fs.writeFileSync("logs/whole.log", JSON.stringify(wholeLog));
+				return;
+			}
 		}
 
 		if (stream.event !== "notification") return;
-
+		
 		const notify = new Notification(stream.data);
 		console.log(notify);
 

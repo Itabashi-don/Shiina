@@ -29,7 +29,7 @@ class Markov {
 	}
 
 	//指定された文字に続く文字をランダムに返す
-	sample (word) {
+	sample (word = null) {
 		let words = this.data[word];
 		if (words === undefined) words = [];
 
@@ -37,9 +37,9 @@ class Markov {
 	}
 
 	//マルコフ連鎖でつなげた文を返す
-	make () {
-		let sentence = [];
-		let word = this.sample(null);
+	make (content = null) {
+		let sentence = [content];
+		let word = this.sample(content);
 
 		while (word) {
 			sentence.push(word);
