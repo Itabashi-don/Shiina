@@ -12,7 +12,7 @@
 
 			"env": {
 				"ENV": "development",
-				"MODE": "study"
+				"MODE": ""
 			}
 		}
 	]

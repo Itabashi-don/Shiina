@@ -2,6 +2,9 @@ const tokenizeContent = document.getElementById("tokenize-content");
 const tokenizeApply = document.getElementById("tokenize-apply");
 const logType = document.getElementById("log-type");
 const logApply = document.getElementById("log-apply");
+/** @type {HTMLSelectElement} */
+const importName = document.getElementById("import-name");
+const importApply = document.getElementById("import-apply");
 const markovAmount = document.getElementById("markov-amount");
 const markovApply = document.getElementById("markov-apply");
 
@@ -55,6 +58,12 @@ class Markov {
 const markov = new Markov();
 
 window.addEventListener("DOMContentLoaded", () => {
+	fetch("/samples").then(res => res.json()).then(files => {
+		for (let file of files) importName.add(new Option(file, file));
+	});
+});
+
+window.addEventListener("DOMContentLoaded", () => {
 	tokenizeApply.addEventListener("click", () => {
 		fetch(`/tokenize?content=${tokenizeContent.value}`).then(res => res.json()).then(tokenized => {
 			console.log(tokenized);
@@ -68,6 +77,14 @@ window.addEventListener("DOMContentLoaded", () => {
 			console.log(log);
 
 			window.$l = log;
+		});
+	});
+
+	importApply.addEventListener("click", () => {
+		fetch(`/sample?name=${importName.value}`).then(res => res.json()).then(lines => {
+			for (let line of lines) {
+				fetch(`/tokenize?content=${line}`).then(res => res.json()).then(morpheme => markov.add(morpheme.map(item => item.surface_form)));
+			}
 		});
 	});
 

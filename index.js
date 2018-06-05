@@ -19,8 +19,10 @@ if (!process.env.TOKEN) throw new TypeError("An environment, 'TOKEN' is required
 
 
 
-if (!fs.existsSync("logs/whole.log")) fs.appendFileSync("logs/whole.log", "[]");
-const wholeLog = fs.existsSync("logs/whole.log") ? JSON.parse(fs.readFileSync("logs/whole.log")) : [];
+if (!fs.existsSync(`${__dirname}/samples`)) fs.mkdirSync(`${__dirname}/samples`);
+if (!fs.existsSync(`${__dirname}/logs`)) fs.mkdirSync(`${__dirname}/logs`);
+if (!fs.existsSync(`${__dirname}/logs/whole.log`)) fs.appendFileSync(`${__dirname}/logs/whole.log`, "[]");
+const wholeLog = fs.existsSync(`${__dirname}/logs/whole.log`) ? JSON.parse(fs.readFileSync(`${__dirname}/logs/whole.log`)) : [];
 
 /** @type {kuromoji.Tokenizer<kuromoji.IpadicFeatures>} */
 let tokenizer = null;
@@ -51,7 +53,7 @@ let homeTimeline = mstdn.stream(process.env.MODE === "study" ? "streaming/public
 				const tokenized = tokenizer.tokenize(status.morphableContent);
 				wholeLog.push(tokenized);
 
-				fs.writeFileSync("logs/whole.log", JSON.stringify(wholeLog));
+				fs.writeFileSync(`${__dirname}/logs/whole.log`, JSON.stringify(wholeLog));
 				return;
 			}
 		}
@@ -89,7 +91,7 @@ let app = express();
 
 	app.get("/log", (req, res) => {
 		const { type } = req.query;
-		const logPath = `logs/${type}.log`;
+		const logPath = `${__dirname}/logs/${type}.log`;
 
 		if (!fs.existsSync(logPath)) throw new TypeError(`${logPath}は存在しません。`);
 
@@ -106,6 +108,24 @@ let app = express();
 		res.end(JSON.stringify(tokenizer.tokenize(content)), "UTF-8");
 	});
 
+	app.get("/sample", (req, res) => {
+		const { name } = req.query;
+
+		fs.readFile(`${__dirname}/samples/${name}`, "UTF-8", (error, text) => {
+			if (error) throw error;
+
+			res.end(JSON.stringify(text.split(/\r?\n/)));
+		});
+	});
+
+	app.get("/samples", (req, res) => {
+		fs.readdir(`${__dirname}/samples`, (error, files) => {
+			if (error) throw error;
+
+			res.end(JSON.stringify(files));
+		});
+	});
+
 app.listen(app.get("PORT"), () => {
 	console.log(`[Shiina] おはよーっ！！ポート${app.get("PORT")}で待ってるねっ♡(´˘\`๑)`);
 	
@@ -114,9 +134,9 @@ app.listen(app.get("PORT"), () => {
 			status: "板橋の民おはよっ！！"
 		});*/
 	} else if (process.env.MODE === "study") {
-		mstdn.post("statuses", {
+		/*mstdn.post("statuses", {
 			status: "学習開始っ！！",
 			visibility: "unlisted"
-		});
+		});*/
 	}
 });
