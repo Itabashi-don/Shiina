@@ -2,26 +2,14 @@ const express = require("express");
 const fs = require("fs");
 const kuromoji = require("kuromoji");
 const Mastodon = require("mastodon-api");
+const Initialize = require("./libs/Initialize");
 const Status = require("./models/Status");
 const MorphableStatus = require("./models/MorphableStatus");
 const Notification = require("./models/Notification");
 
+const ENV = process.env;
 
 
-//Initialization of environments
-process.env.ENV = process.env.ENV || "production";
-process.env.MODE = process.env.MODE || "";
-
-if (process.env.ENV == "development") require("dotenv").config();
-
-if (!process.env.INSTANCE) throw new TypeError("An environment, 'INSTANCE' is required.");
-if (!process.env.TOKEN) throw new TypeError("An environment, 'TOKEN' is required.");
-
-
-
-if (!fs.existsSync(`${__dirname}/samples`)) fs.mkdirSync(`${__dirname}/samples`);
-if (!fs.existsSync(`${__dirname}/logs`)) fs.mkdirSync(`${__dirname}/logs`);
-if (!fs.existsSync(`${__dirname}/logs/whole.log`)) fs.appendFileSync(`${__dirname}/logs/whole.log`, "[]");
 const wholeLog = fs.existsSync(`${__dirname}/logs/whole.log`) ? JSON.parse(fs.readFileSync(`${__dirname}/logs/whole.log`)) : [];
 
 /** @type {kuromoji.Tokenizer<kuromoji.IpadicFeatures>} */
