@@ -2,10 +2,10 @@ const express = require("express");
 const fs = require("fs");
 const kuromoji = require("kuromoji");
 const Mastodon = require("mastodon-api");
-const Initialize = require("./libs/Initialize");
 const Status = require("./models/Status");
 const MorphableStatus = require("./models/MorphableStatus");
 const Notification = require("./models/Notification");
+const Initialize = require("./libs/Initialize");
 
 const ENV = process.env;
 

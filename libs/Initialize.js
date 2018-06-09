@@ -21,7 +21,7 @@ class Environment {
 
 				super(`An environment, '${envName}' is required.`);
 			}
-		}
+		};
 	}
 }
 
@@ -32,15 +32,11 @@ class DirStructure {
 	//Initialization of directories
 	static init () {
 		for (let dirName of DirStructure.DIRNAMES) {
-			const PATH = `${dirName}`;
-
-			fs.existsSync(PATH) || fs.mkdirSync(PATH);
+			if (!fs.existsSync(dirName)) fs.mkdirSync(dirName);
 		}
 
 		for (let fileName of DirStructure.FILENAMES) {
-			const PATH = `${fileName}`;
-
-			fs.existsSync(PATH) || fs.appendFileSync(PATH, "");
+			if (!fs.existsSync(fileName)) fs.appendFileSync(fileName, "");
 		}
 	}
 }
