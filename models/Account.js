@@ -1,7 +1,13 @@
+const Mastodon = require("mastodon-api");
 const htmlToText = require("html-to-text");
 
-//See https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md#account
-module.exports = class Account extends Object {
+
+
+/**
+ * See https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md#account
+ * @class Account @extends Object
+ */
+class Account extends Object {
 	/**
 	 * Accountモデルを生成
 	 * @param {Object} statusData
@@ -41,4 +47,6 @@ module.exports = class Account extends Object {
 	static getMe (mastodonObj) {
 		return mastodonObj.get("accounts/verify_credentials").then(res => new Account(res.data));
 	}
-};
+}
+
+module.exports = Account;
