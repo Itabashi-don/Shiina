@@ -1,17 +1,27 @@
-# 環境変数一覧
+# 環境変数一覧(A list of environment)
 
-## INSTANCE(URLString型)
-* 動作させるアカウントがあるインスタンスのURL
 
-## TOKEN(String型)
-* 動作させるアカウントのトークン(書き込み・読み取り属性必須)
 
-## ENV(String型)
-* 動作環境
-  * `"production"` ... 本番用
-  * `"development"` ... デバッグ用(.envファイルの読み込みが有効になります)
+### SHIINA_INSTANCE(URLString型)
+動作させるアカウントがあるインスタンスのURL(ex: https://itabashi.0j0.jp)
 
-## MODE(String型)
-* 常駐モード
-  * `""` ... 会話モード
-  * `"study"` ... 学習モード(連合TLからトゥートを取得・学習します)
+### SHIINA_TOKEN(String型)
+動作させるアカウントのトークン(書き込み・読み取り属性必須)
+
+### SHIINA_ENV(String型)
+動作環境
+* `production` ... 製品用
+* `development` ... 開発用(以下の項目が実行される)
+  * .envファイルの読み込み
+  * `SHIINA_MODE`の定義
+
+### SHIINA_MODE(String型)
+動作モード(`SHIINA_ENV=development`の時のみ有効)
+* (空値) ... 会話BOTモード
+* `learning` ... 学習モード(連合TLからトゥート取得・学習)
+* `debug` ... デバッグモード(以下の項目が実行される)
+  * デバッグビューの起動
+  * サンプル教師データの読み込み
+
+### SHIINA_PORT(Number型)
+Willを動かすポート(初期値：8001)

@@ -11,8 +11,8 @@
 			"program": "${workspaceFolder}\\index.js",
 
 			"env": {
-				"ENV": "development",
-				"MODE": ""
+				"SHIINA_ENV": "development",
+				"SHIINA_MODE": ""
 			}
 		}
 	]

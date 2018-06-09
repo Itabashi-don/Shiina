@@ -5,13 +5,13 @@ class Environment {
 	static init () {
 		const self = process.env;
 
-		self.ENV = self.ENV || "production";
-		self.MODE = self.MODE || "";
+		self.SHIINA_ENV = self.SHIINA_ENV || "production";
+		self.SHIINA_MODE = self.SHIINA_MODE || "";
 		
-		if (self.ENV == "development") require("dotenv").config();
+		if (self.SHIINA_ENV == "development") require("dotenv").config();
 
-		if (!self.INSTANCE) throw new Environment.EnvironmentError("INSTANCE");
-		if (!self.TOKEN) throw new Environment.EnvironmentError("TOKEN");
+		if (!self.SHIINA_INSTANCE) throw new Environment.EnvironmentError("INSTANCE");
+		if (!self.SHIINA_TOKEN) throw new Environment.EnvironmentError("TOKEN");
 	}
 
 	static get EnvironmentError () {
@@ -19,24 +19,38 @@ class Environment {
 			constructor (envName) {
 				if (!envName) throw new TypeError("An argument, 'envName' is required.");
 
-				super(`An environment, '${envName}' is required.`);
+				super(`An environment, 'SHIINA_${envName}' is required.`);
 			}
 		};
 	}
 }
 
 class DirStructure {
-	static get DIRNAMES () { return ["samples", "logs"]; }
-	static get FILENAMES () { return ["logs/whole.log"]; }
+	static get DIRS () { return ["samples", "logs"]; }
+	static get FILES () { return []; }
+	static get JSONS () {
+		return {
+			Object: [],
+			Array: ["logs/whole.log"]
+		};
+	}
 
 	//Initialization of directories
 	static init () {
-		for (let dirName of DirStructure.DIRNAMES) {
-			if (!fs.existsSync(dirName)) fs.mkdirSync(dirName);
-		}
+		const { DIRS, FILES, JSONS } = DirStructure;
 
-		for (let fileName of DirStructure.FILENAMES) {
-			if (!fs.existsSync(fileName)) fs.appendFileSync(fileName, "");
+		for (let dir of DIRS) if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+		for (let file of FILES) if (!fs.existsSync(file)) fs.appendFileSync(file, "");
+
+		for (let type in JSONS) {
+			for (let json of JSONS[type]) {
+				if (fs.existsSync(json)) return;
+
+				switch (type) {
+					case "Object": return fs.appendFileSync(json, "{}");
+					case "Array": return fs.appendFileSync(json, "[]");
+				}
+			}
 		}
 	}
 }

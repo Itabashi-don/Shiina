@@ -1,6 +1,9 @@
 const Status = require("./Status");
 
-module.exports = class MorphableStatus extends Status {
+
+
+/** @class MorphableStatus @extends Status */
+class MorphableStatus extends Status {
 	/**
 	 * MorphableStatusモデルを生成
 	 * @param {Object} statusData
@@ -20,4 +23,6 @@ module.exports = class MorphableStatus extends Status {
 			.replace(/(?:^|[^/\w])@((\w+([\w.]+\w+)?)(?:@[\w.-]+\w+)?)/g, "")
 			.replace(/(?:^|[^/)\w\u3041-\u3096\u30A1-\u30FA\u3400-\u9FFF])#([\w\u3041-\u3096\u30A1-\u30FA\u3400-\u9FFF·]*)/ig, "");
 	}
-};
+}
+
+module.exports = MorphableStatus;

@@ -18,42 +18,45 @@ let tokenizer = null;
 		if (error) throw error;
 
 		tokenizer = _tokenizer;
-		console.info("Tokenizer has been ready.");
+		console.info("Tokenizer is ready.");
 	});
 
 const mstdn = new Mastodon({
-	api_url: `${process.env.INSTANCE}/api/v1/`,
-	access_token: process.env.TOKEN
+	api_url: `${ENV.SHIINA_INSTANCE}/api/v1/`,
+	access_token: ENV.SHIINA_TOKEN
 });
 
-let homeTimeline = mstdn.stream(process.env.MODE === "study" ? "streaming/public" : "streaming/user");
+let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/public" : "streaming/user");
 	homeTimeline.on("error", error => { throw error; });
 
 	homeTimeline.on("message", stream => {
 		//See https://github.com/tootsuite/documentation/blob/master/Using-the-API/Streaming-API.md#event-types
-		if (process.env.MODE === "study") {
-			if (stream.event === "update" && tokenizer) {
-				const status = new MorphableStatus(stream.data);
-				console.log(status);
-
-				if (status.language !== "ja") return;
-
-				const tokenized = tokenizer.tokenize(status.morphableContent);
-				wholeLog.push(tokenized);
-
-				fs.writeFileSync(`${__dirname}/logs/whole.log`, JSON.stringify(wholeLog));
-				return;
+		if (ENV.SHIINA_ENV === "development") {
+			switch (ENV.SHIINA_MODE) {
+				case "learning":
+					if (stream.event === "update" && tokenizer) {
+						const status = new MorphableStatus(stream.data);
+						console.log(status);
+						
+						if (status.language !== "ja") return;
+						
+						const tokenized = tokenizer.tokenize(status.morphableContent);
+						wholeLog.push(tokenized);
+		
+						fs.writeFileSync(`${__dirname}/logs/whole.log`, JSON.stringify(wholeLog));
+						return;
+					}
+					
+					break;
 			}
 		}
 
-		if (stream.event !== "notification") return;
+		if (stream.event === "notification") return;
 		
 		const notify = new Notification(stream.data);
 		console.log(notify);
 
-		if (notify.type === "follow") {
-			//mstdn.post("follows", { uri: notify.account.fediverseAcct });
-		} else if (notify.type === "mention" && notify.status) {
+		if (notify.type === "mention") {
 			const { account, id, sensitive, spoiler_text, visibility } = notify.status;
 
 			mstdn.post("statuses", {
@@ -73,7 +76,7 @@ let homeTimeline = mstdn.stream(process.env.MODE === "study" ? "streaming/public
 
 
 let app = express();
-	app.set("PORT", process.env.PORT || 8001);
+	app.set("PORT", ENV.SHIINA_PORT || 8001);
 
 	app.use("/", express.static(`${__dirname}/views`));
 
@@ -115,16 +118,19 @@ let app = express();
 	});
 
 app.listen(app.get("PORT"), () => {
-	console.log(`[Shiina] おはよーっ！！ポート${app.get("PORT")}で待ってるねっ♡(´˘\`๑)`);
-	
-	if (!process.env.MODE) {
-		/*mstdn.post("statuses", {
+	console.log(`[Shiina | ${ENV.SHIINA_ENV}] おはよーっ！！ポート${app.get("PORT")}で待ってるねっ♡(´˘\`๑)`);
+
+	if (ENV.SHIINA_ENV === "production") {
+		return mstdn.post("statuses", {
 			status: "板橋の民おはよっ！！"
-		});*/
-	} else if (process.env.MODE === "study") {
-		/*mstdn.post("statuses", {
-			status: "学習開始っ！！",
-			visibility: "unlisted"
-		});*/
+		});
+	}
+
+	switch (ENV.SHIINA_MODE) {
+		case "learning":
+			return mstdn.post("statuses", {
+				status: "ヤバい！！そろそろ授業だ！！",
+				visibility: "unlisted"
+			});
 	}
 });

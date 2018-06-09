@@ -1,8 +1,8 @@
-//See https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md#mention
-module.exports = class MentionCollection extends Array {
+/** @class MentionCollection @extends Array<Mention> */
+class MentionCollection extends Array {
 	/**
 	 * MentionCollectionモデルを生成
-	 * @param {Object} mentions
+	 * @param {Array<Mention>} mentions
 	 */
 	constructor (mentions) {
 		Object.assign(super(), mentions);
@@ -18,4 +18,16 @@ module.exports = class MentionCollection extends Array {
 
 		return mentions.join(" ");
 	}
-};
+}
+
+/**
+ * See https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md#mention
+ * 
+ * @typedef {Object} Mention
+ * @prop {String} url
+ * @prop {String} username
+ * @prop {String} acct
+ * @prop {Number} id
+ */
+
+module.exports = MentionCollection;

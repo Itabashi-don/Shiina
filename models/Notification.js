@@ -2,8 +2,13 @@ const htmlToText = require("html-to-text");
 const Account = require("./Account");
 const Status = require("./Status");
 
-//See https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md#notification
-module.exports = class Notification extends Object {
+
+
+/**
+ * See https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md#notification
+ * @class Notification @extends Object
+ */
+class Notification extends Object {
 	/**
 	 * Notificationモデルを生成
 	 * @param {Object} notificationData
@@ -14,4 +19,6 @@ module.exports = class Notification extends Object {
 		this.account = new Account(this.account);
 		if (this.status) this.status = new Status(this.status);
 	}
-};
+}
+
+module.exports = Notification;
