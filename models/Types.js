@@ -99,7 +99,7 @@
 
 
 /**
- * https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md#attachment
+ * See https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md#attachment
  * 
  * @typedef {Object} Attachment
  * @prop {Number} id
