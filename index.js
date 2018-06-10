@@ -2,12 +2,13 @@ const express = require("express");
 const fs = require("fs");
 const kuromoji = require("kuromoji");
 const Mastodon = require("mastodon-api");
-const Status = require("./models/Status");
+const Types = require("./models/Types");
 const MorphableStatus = require("./models/MorphableStatus");
 const Notification = require("./models/Notification");
-const Initialize = require("./libs/Initialize");
 
+const Initialize = require("./libs/Initialize");
 const ENV = process.env;
+
 
 
 const wholeLog = fs.existsSync(`${__dirname}/logs/whole.log`) ? JSON.parse(fs.readFileSync(`${__dirname}/logs/whole.log`)) : [];
@@ -28,50 +29,52 @@ const mstdn = new Mastodon({
 
 let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/public" : "streaming/user");
 	homeTimeline.on("error", error => { throw error; });
+	
+	homeTimeline.on("message",
+		/** @param {Types.Stream} stream */
+		stream => {
+			if (ENV.SHIINA_ENV === "development") {
+				switch (ENV.SHIINA_MODE) {
+					case "learning":
+						if (stream.event === "update" && tokenizer) {
+							const status = new MorphableStatus(stream.data);
+							console.log(status);
+							
+							if (status.language !== "ja") return;
+							
+							const tokenized = tokenizer.tokenize(status.morphableContent);
+							wholeLog.push(tokenized);
+			
+							fs.writeFileSync(`${__dirname}/logs/whole.log`, JSON.stringify(wholeLog));
+							return;
+						}
+						
+						break;
+				}
+			}
 
-	homeTimeline.on("message", stream => {
-		//See https://github.com/tootsuite/documentation/blob/master/Using-the-API/Streaming-API.md#event-types
-		if (ENV.SHIINA_ENV === "development") {
-			switch (ENV.SHIINA_MODE) {
-				case "learning":
-					if (stream.event === "update" && tokenizer) {
-						const status = new MorphableStatus(stream.data);
-						console.log(status);
-						
-						if (status.language !== "ja") return;
-						
-						const tokenized = tokenizer.tokenize(status.morphableContent);
-						wholeLog.push(tokenized);
-		
-						fs.writeFileSync(`${__dirname}/logs/whole.log`, JSON.stringify(wholeLog));
-						return;
-					}
-					
-					break;
+			if (stream.event === "notification") return;
+			
+			const notify = new Notification(stream.data);
+			console.log(notify);
+
+			if (notify.type === "mention") {
+				const { account, id, sensitive, spoiler_text, visibility } = notify.status;
+
+				mstdn.post("statuses", {
+					status: [
+						`@${account.acct}`,
+						"お呼びですかーっ！？？✌︎('ω'✌︎ )"
+					].join("\r\n"),
+
+					sensitive,
+					spoiler_text,
+					in_reply_to_id: id,
+					visibility
+				});
 			}
 		}
-
-		if (stream.event === "notification") return;
-		
-		const notify = new Notification(stream.data);
-		console.log(notify);
-
-		if (notify.type === "mention") {
-			const { account, id, sensitive, spoiler_text, visibility } = notify.status;
-
-			mstdn.post("statuses", {
-				status: [
-					`@${account.acct}`,
-					"お呼びですかーっ！？？✌︎('ω'✌︎ )"
-				].join("\r\n"),
-
-				sensitive,
-				spoiler_text,
-				in_reply_to_id: id,
-				visibility
-			});
-		}
-	});
+	);
 
 
 

@@ -1,8 +1,12 @@
-/** @class MentionCollection @extends Array<Mention> */
+const Types = require("./Types");
+
+
+
+/** @class MentionCollection @extends Array<Types.Mention> */
 class MentionCollection extends Array {
 	/**
 	 * MentionCollectionモデルを生成
-	 * @param {Array<Mention>} mentions
+	 * @param {Array<Types.Mention>} mentions
 	 */
 	constructor (mentions) {
 		Object.assign(super(), mentions);
@@ -19,15 +23,5 @@ class MentionCollection extends Array {
 		return mentions.join(" ");
 	}
 }
-
-/**
- * See https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md#mention
- * 
- * @typedef {Object} Mention
- * @prop {String} url
- * @prop {String} username
- * @prop {String} acct
- * @prop {Number} id
- */
 
 module.exports = MentionCollection;

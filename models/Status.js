@@ -1,4 +1,5 @@
 const htmlToText = require("html-to-text");
+const Types = require("./Types");
 const Account = require("./Account");
 
 
@@ -10,11 +11,11 @@ const Account = require("./Account");
 class Status extends Object {
 	/**
 	 * Statusモデルを生成
-	 * @param {Object} statusData
+	 * @param {Types.Statusable} data
 	 */
-	constructor (statusData) {
-		Object.assign(super(), statusData);
-
+	constructor (data) {
+		Object.assign(super(), data);
+		
 		this.account = new Account(this.account);
 		if (this.reblog) this.reblog = new Status(this.reblog);
 	}

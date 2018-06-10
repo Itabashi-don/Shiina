@@ -1,4 +1,5 @@
 const htmlToText = require("html-to-text");
+const Types = require("./Types");
 const Account = require("./Account");
 const Status = require("./Status");
 
@@ -11,10 +12,10 @@ const Status = require("./Status");
 class Notification extends Object {
 	/**
 	 * Notificationモデルを生成
-	 * @param {Object} notificationData
+	 * @param {Types.Notifirable} data
 	 */
-	constructor (notificationData) {
-		Object.assign(super(), notificationData);
+	constructor (data) {
+		Object.assign(super(), data);
 
 		this.account = new Account(this.account);
 		if (this.status) this.status = new Status(this.status);
