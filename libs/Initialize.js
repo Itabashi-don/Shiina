@@ -34,7 +34,7 @@ class DirStructure {
 	static get JSONS () {
 		return {
 			Object: [],
-			Array: ["logs/whole.log"]
+			Array: ["logs/dialogue.log"]
 		};
 	}
 

@@ -11,6 +11,8 @@ const ENV = process.env;
 
 
 
+const dialogue = JSON.parse(fs.readFileSync(`${__dirname}/logs/dialogue.log`));
+
 /** @type {kuromoji.Tokenizer<kuromoji.IpadicFeatures>} */
 let tokenizer = null;
 	kuromoji.builder({ dicPath: `${__dirname}/node_modules/kuromoji/dict` }).build((error, _tokenizer) => {
@@ -21,6 +23,7 @@ let tokenizer = null;
 	});
 
 const mstdn = new Mastodon({ api_url: `${ENV.SHIINA_INSTANCE}/api/v1/`, access_token: ENV.SHIINA_TOKEN });
+
 let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/public" : "streaming/user");
 	homeTimeline.on("error", error => { throw error; });
 	
@@ -33,8 +36,12 @@ let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/publ
 						if (stream.event === "update" && tokenizer) {
 							const status = new MorphableStatus(stream.data);
 							
-							if (status.language !== "ja") {
+							if (status.language === "ja") {
 								const tokenized = tokenizer.tokenize(status.morphableContent);
+								dialogue.push(tokenized);
+
+								fs.writeFile(`${__dirname}/logs/dialogue.log`, JSON.stringify(dialogue));
+								return;
 							}
 						}
 						
@@ -86,20 +93,28 @@ let app = express();
 	});
 
 	app.get("/tokenize", (req, res) => {
-		const { content } = req.query;
-		const tokenized = tokenizer.tokenize(content);
-		const sentences = [];
+		const { text, mode } = req.query;
 
-		let i1 = 0, i2 = tokenized.length;
-		while ((i2 = tokenized.slice(i1, i2).findIndex(word => word.basic_form === "。")) !== -1) {
-			sentences.push(tokenized.slice(i1, i1 + i2 + 1));
+		const tokenized = tokenizer.tokenize(text);
 
-			i1 += i2 + 1;
-			i2 = tokenized.length;
+		if (!mode || mode === "short") {
+			res.end(JSON.stringify(tokenized));
+			return;
+		} else if (mode === "long") {
+			const sentences = [];
+
+			let i1 = 0, i2 = tokenized.length;
+			while ((i2 = tokenized.slice(i1, i2).findIndex(word => word.basic_form === "。")) !== -1) {
+				sentences.push(tokenized.slice(i1, i1 + i2 + 1));
+
+				i1 += i2 + 1;
+				i2 = tokenized.length;
+			}
+			sentences.push(tokenized.slice(i1, tokenized.length));
+
+			res.end(JSON.stringify(sentences));
+			return;
 		}
-		sentences.push(tokenized.slice(i1, tokenized.length));
-
-		res.end(JSON.stringify(sentences));
 	});
 
 	app.get("/sample", (req, res) => {
