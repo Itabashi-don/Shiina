@@ -1,7 +1,9 @@
 const fs = require("fs");
 
+
+
 class Environment {
-	//Initialization of environments
+	//Initialization of environment
 	static init () {
 		const self = process.env;
 
@@ -10,20 +12,21 @@ class Environment {
 		
 		if (self.SHIINA_ENV == "development") require("dotenv").config();
 
-		if (!self.SHIINA_INSTANCE) throw new Environment.EnvironmentError("INSTANCE");
-		if (!self.SHIINA_TOKEN) throw new Environment.EnvironmentError("TOKEN");
-	}
-
-	static get EnvironmentError () {
-		return class EnvironmentError extends TypeError {
-			constructor (envName) {
-				if (!envName) throw new TypeError("An argument, 'envName' is required.");
-
-				super(`An environment, 'SHIINA_${envName}' is required.`);
-			}
-		};
+		if (!self.SHIINA_INSTANCE) throw new EnvironmentError("INSTANCE");
+		if (!self.SHIINA_TOKEN) throw new EnvironmentError("TOKEN");
 	}
 }
+
+class EnvironmentError extends TypeError {
+	/** @param {String} envName */
+	constructor (envName) {
+		if (!envName) throw new TypeError("An argument, 'envName' is required.");
+
+		super(`An environment, 'SHIINA_${envName}' is required.`);
+	}
+}
+
+
 
 class DirStructure {
 	static get DIRS () { return ["samples", "logs"]; }
@@ -35,7 +38,7 @@ class DirStructure {
 		};
 	}
 
-	//Initialization of directories
+	//Initialization of directory
 	static init () {
 		const { DIRS, FILES, JSONS } = DirStructure;
 
@@ -55,7 +58,9 @@ class DirStructure {
 	}
 }
 
-Environment.init();
-DirStructure.init();
+
 
 module.exports = { Environment, DirStructure };
+
+Environment.init();
+DirStructure.init();

@@ -11,8 +11,6 @@ const ENV = process.env;
 
 
 
-const wholeLog = fs.existsSync(`${__dirname}/logs/whole.log`) ? JSON.parse(fs.readFileSync(`${__dirname}/logs/whole.log`)) : [];
-
 /** @type {kuromoji.Tokenizer<kuromoji.IpadicFeatures>} */
 let tokenizer = null;
 	kuromoji.builder({ dicPath: `${__dirname}/node_modules/kuromoji/dict` }).build((error, _tokenizer) => {
@@ -22,11 +20,7 @@ let tokenizer = null;
 		console.info("Tokenizer is ready.");
 	});
 
-const mstdn = new Mastodon({
-	api_url: `${ENV.SHIINA_INSTANCE}/api/v1/`,
-	access_token: ENV.SHIINA_TOKEN
-});
-
+const mstdn = new Mastodon({ api_url: `${ENV.SHIINA_INSTANCE}/api/v1/`, access_token: ENV.SHIINA_TOKEN });
 let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/public" : "streaming/user");
 	homeTimeline.on("error", error => { throw error; });
 	
@@ -38,15 +32,10 @@ let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/publ
 					case "learning":
 						if (stream.event === "update" && tokenizer) {
 							const status = new MorphableStatus(stream.data);
-							console.log(status);
 							
-							if (status.language !== "ja") return;
-							
-							const tokenized = tokenizer.tokenize(status.morphableContent);
-							wholeLog.push(tokenized);
-			
-							fs.writeFileSync(`${__dirname}/logs/whole.log`, JSON.stringify(wholeLog));
-							return;
+							if (status.language !== "ja") {
+								const tokenized = tokenizer.tokenize(status.morphableContent);
+							}
 						}
 						
 						break;
@@ -98,8 +87,19 @@ let app = express();
 
 	app.get("/tokenize", (req, res) => {
 		const { content } = req.query;
+		const tokenized = tokenizer.tokenize(content);
+		const sentences = [];
 
-		res.end(JSON.stringify(tokenizer.tokenize(content)), "UTF-8");
+		let i1 = 0, i2 = tokenized.length;
+		while ((i2 = tokenized.slice(i1, i2).findIndex(word => word.basic_form === "。")) !== -1) {
+			sentences.push(tokenized.slice(i1, i1 + i2 + 1));
+
+			i1 += i2 + 1;
+			i2 = tokenized.length;
+		}
+		sentences.push(tokenized.slice(i1, tokenized.length));
+
+		res.end(JSON.stringify(sentences));
 	});
 
 	app.get("/sample", (req, res) => {
@@ -132,7 +132,7 @@ app.listen(app.get("PORT"), () => {
 	switch (ENV.SHIINA_MODE) {
 		case "learning":
 			return mstdn.post("statuses", {
-				status: "ヤバい！！そろそろ授業だ！！",
+				status: "自習するぞーっ！",
 				visibility: "unlisted"
 			});
 	}

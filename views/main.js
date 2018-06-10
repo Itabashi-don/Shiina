@@ -41,15 +41,21 @@ class Markov {
 
 	//マルコフ連鎖でつなげた文を返す
 	make (content = null) {
-		let sentence = [content];
-		let word = this.sample(content);
+		return fetch(`/tokenize?content=${content}`).then(res => res.json()).then(tokenized => {
+			const mixed = [];
+			for (let sentence of tokenized) Array.prototype.push.apply(mixed, sentence.map(word => word.surface_form));
 
-		while (word) {
-			sentence.push(word);
-			word = this.sample(word);
-		}
+			return mixed;
+		}).then(sentence => {
+			let word = this.sample(sentence[sentence.length - 1]);
 
-		return sentence.join("");
+			while (word) {
+				sentence.push(word);
+				word = this.sample(word);
+			}
+
+			return sentence.join("");
+		});
 	}
 }
 
