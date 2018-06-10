@@ -1,5 +1,6 @@
 const Mastodon = require("mastodon-api");
 const htmlToText = require("html-to-text");
+const Types = require("./Types");
 
 
 
@@ -10,10 +11,10 @@ const htmlToText = require("html-to-text");
 class Account extends Object {
 	/**
 	 * Accountモデルを生成
-	 * @param {Object} statusData
+	 * @param {Types.Accountable} data
 	 */
-	constructor (accountData) {
-		Object.assign(super(), accountData);
+	constructor (data) {
+		Object.assign(super(), data);
 	}
 
 	/**

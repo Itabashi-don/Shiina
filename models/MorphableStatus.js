@@ -1,3 +1,4 @@
+const Types = require("./Types");
 const Status = require("./Status");
 
 
@@ -6,10 +7,10 @@ const Status = require("./Status");
 class MorphableStatus extends Status {
 	/**
 	 * MorphableStatusモデルを生成
-	 * @param {Object} statusData
+	 * @param {Types.Statusable} data
 	 */
-	constructor (statusData) {
-		super(statusData);
+	constructor (data) {
+		super(data);
 	}
 
 	/**
