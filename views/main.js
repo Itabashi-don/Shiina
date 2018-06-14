@@ -64,7 +64,9 @@ class Generator {
 		/** @type {Object<string, Kuromoji.IpadicFeatures[]>} */
 		this.wordSet = {};
 		/** @type {Object<string, Kuromoji.IpadicFeatures[]>} */
-		this.structureSet = {};
+		this.wordSetByStructure = {};
+		/** @type {String[][]} */
+		this.structureSet = [];
 	}
 
 	/**
@@ -72,19 +74,23 @@ class Generator {
 	 * @param {Kuromoji.IpadicFeatures[]} tokenized
 	 */
 	register (tokenized) {
-		tokenized.forEach((wordInfo, index, parent) => {
-			const nowWord = wordInfo;
+		const { wordSet, wordSetByStructure, structureSet } = this;
+
+		tokenized.forEach((word, index, parent) => {
+			const nowWord = word;
 			const nowStructure = nowWord.pos;
 			const prevForm = parent[index - 1] ? parent[index - 1].surface_form : "";
 
 			if (!nowWord) return;
 
-			if (!this.wordSet[prevForm]) this.wordSet[prevForm] = [];
-			if (!this.structureSet[nowStructure]) this.structureSet[nowStructure] = [];
+			if (!wordSet[prevForm]) wordSet[prevForm] = [];
+			if (!wordSetByStructure[nowStructure]) wordSetByStructure[nowStructure] = [];
 
-			this.wordSet[prevForm].push(nowWord);
-			this.structureSet[nowStructure].push(nowWord);
+			wordSet[prevForm].push(nowWord);
+			wordSetByStructure[nowStructure].push(nowWord);
 		});
+
+		structureSet.push(tokenized.map(word => word.pos));
 	}
 
 	/**
@@ -94,18 +100,19 @@ class Generator {
 	 * @return {Kuromoji.IpadicFeatures}
 	 */
 	next (word = "") {
-		const words = this.wordSet[word];
+		const { wordSet, wordSetByStructure } = this;
 
-		if (!words) return;
+		if (!wordSet[word]) return;
 
+		const words = wordSet[word];
 		const structures = words.map(word => word.pos);
 		const currentStructure = structures[Math.floor(Math.random() * structures.length)];
 
 		if (!word) {
-			const matchedWords = this.structureSet[currentStructure];
+			const matchedWords = wordSetByStructure[currentStructure];
 			return matchedWords[Math.floor(Math.random() * matchedWords.length)];
 		}
-
+		
 		const matchedWords = words.filter(word => word.pos === currentStructure);
 		return matchedWords[Math.floor(Math.random() * matchedWords.length)];
 	}
@@ -132,6 +139,7 @@ class Generator {
 
 
 const markov = new Markov();
+const generator = new Generator();
 
 window.addEventListener("DOMContentLoaded", () => {
 	fetch("/samples").then(res => res.json()).then(files => {
@@ -145,6 +153,14 @@ window.addEventListener("DOMContentLoaded", () => {
 			console.log(tokenized);
 
 			window.$t = tokenized;
+		});
+
+		fetch(`/tokenize?text=${tokenizeContent.value}&mode=long`).then(res => res.json()).then(tokenized => {
+			console.log(tokenized);
+			
+			for (let sentence of tokenized) {
+				generator.register(sentence);
+			}
 		});
 	});
 
