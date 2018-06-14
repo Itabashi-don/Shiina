@@ -1,6 +1,6 @@
 const express = require("express");
 const fs = require("fs");
-const kuromoji = require("kuromoji");
+const Kuromoji = require("kuromoji");
 const Mastodon = require("mastodon-api");
 const Types = require("./models/Types");
 const MorphableStatus = require("./models/MorphableStatus");
@@ -13,9 +13,9 @@ const ENV = process.env;
 
 const dialogue = JSON.parse(fs.readFileSync(`${__dirname}/logs/dialogue.log`));
 
-/** @type {kuromoji.Tokenizer<kuromoji.IpadicFeatures>} */
+/** @type {Kuromoji.Tokenizer<Kuromoji.IpadicFeatures>} */
 let tokenizer = null;
-	kuromoji.builder({ dicPath: `${__dirname}/node_modules/kuromoji/dict` }).build((error, _tokenizer) => {
+	Kuromoji.builder({ dicPath: `${__dirname}/node_modules/kuromoji/dict` }).build((error, _tokenizer) => {
 		if (error) throw error;
 
 		tokenizer = _tokenizer;
