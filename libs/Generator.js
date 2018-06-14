@@ -17,15 +17,16 @@ class Generator {
 	register (tokenized) {
 		tokenized.forEach((wordInfo, index, parent) => {
 			const nowWord = wordInfo;
+			const nowStructure = nowWord.pos;
 			const prevForm = parent[index - 1] ? parent[index - 1].surface_form : "";
 
 			if (!nowWord) return;
 
 			if (!this.wordSet[prevForm]) this.wordSet[prevForm] = [];
-			if (!this.structureSet[nowWord.pos]) this.structureSet[nowWord.pos] = [];
+			if (!this.structureSet[nowStructure]) this.structureSet[nowStructure] = [];
 
 			this.wordSet[prevForm].push(nowWord);
-			this.structureSet[nowWord.pos].push(nowWord);
+			this.structureSet[nowStructure].push(nowWord);
 		});
 
 
