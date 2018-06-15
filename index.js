@@ -35,7 +35,6 @@ let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/publ
 					case "learning":
 						if (stream.event === "update" && tokenizer) {
 							const status = new MorphableStatus(stream.data);
-							console.log(status);
 							
 							if (!status.account.bot && status.language === "ja") {
 								const tokenized = tokenizer.tokenize(status.morphableContent);
