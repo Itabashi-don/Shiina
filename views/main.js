@@ -80,10 +80,11 @@ class Generator {
 
 		let next = word;
 		let counter = 0;
-		while ((next = this.next(next, (!word && isAdvanced) ? structures[counter] : null))) {
+		while ((next = this.next(next, isAdvanced ? structures[counter] : null))) {
 			next = next.surface_form;
 			counter++;
 
+			if (content.length >= 200) break;
 			content.push(next);
 		}
 
@@ -148,12 +149,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
 	importApply.addEventListener("click", () => {
 		fetch(`/sample?name=${importName.value}`).then(res => res.json()).then(text => {
-			return fetch(`/tokenize?text=${text}&mode=long`).then(res => res.json());
-		}).then(tokenized => {
-			console.log(tokenized);
-			
-			for (let sentence of tokenized) {
-				generator.register(sentence);
+			for (let line of text) {
+				fetch(`/tokenize?text=${line}&mode=long`).then(res => res.json()).then(tokenized => {
+					console.log(tokenized);
+					
+					for (let sentence of tokenized) {
+						generator.register(sentence);
+					}
+				});
 			}
 		});
 	});

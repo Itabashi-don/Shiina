@@ -34,22 +34,6 @@ class Generator {
 			if (!wordSet[prevForm]) wordSet[prevForm] = [];
 			wordSet[prevForm].push(nowWord);
 		});
-
-
-
-		/*tokenized.forEach((wordInfo, index, parent) => {
-			const nowWord = wordInfo;
-			const nowStructure = `${nowWord.pos}|${nowWord.pos_detail_1}|${nowWord.pos_detail_2}|${nowWord.pos_detail_3}`;
-			const prevForm = parent[index - 1] ? parent[index - 1].surface_form : "";
-
-			if (!nowWord) return;
-
-			if (!this.wordSet[prevForm]) this.wordSet[prevForm] = [];
-			if (!this.structureSet[nowStructure]) this.structureSet[nowStructure] = [];
-
-			this.wordSet[prevForm].push(nowWord);
-			this.structureSet[nowStructure].push(nowWord);
-		});*/
 	}
 
 	/**
@@ -76,24 +60,6 @@ class Generator {
 		
 		const matchedWords = words.filter(word => word.pos === (structure || currentStructure));
 		return matchedWords[Math.floor(Math.random() * matchedWords.length)];
-
-
-
-		/*const formatPos = word => `${word.pos}|${word.pos_detail_1}|${word.pos_detail_2}|${word.pos_detail_3}`;
-		const words = this.wordSet[word];
-
-		if (!words) return;
-
-		const structures = words.map(word => formatPos(word));
-		const currentStructure = structures[Math.floor(Math.random() * structures.length)];
-
-		if (!word) {
-			const matchedWords = this.structureSet[currentStructure];
-			return matchedWords[Math.floor(Math.random() * matchedWords.length)];
-		}
-
-		const matchedWords = words.filter(word => formatPos(word) === currentStructure);
-		return matchedWords[Math.floor(Math.random() * matchedWords.length)];*/
 	}
 
 	/**
@@ -112,10 +78,11 @@ class Generator {
 
 		let next = word;
 		let counter = 0;
-		while ((next = this.next(next, (!word && isAdvanced) ? structures[counter] : null))) {
+		while ((next = this.next(next, isAdvanced ? structures[counter] : null))) {
 			next = next.surface_form;
 			counter++;
 
+			if (content.length >= 200) break;
 			content.push(next);
 		}
 
@@ -153,7 +120,7 @@ class StructureError extends TypeError {
 	 * @param {String} type
 	 */
 	constructor (type) {
-		super(`A structure type, "${type}" is not acceptable`);
+		super(`A structure type, "${type ? type : ""}" is not acceptable`);
 	}
 }
 
