@@ -40,7 +40,7 @@ let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/publ
 								const tokenized = tokenizer.tokenize(status.morphableContent);
 								dialogue.push(tokenized);
 
-								fs.writeFile(`${__dirname}/logs/dialogue.log`, JSON.stringify(dialogue));
+								fs.writeFile(`${__dirname}/logs/dialogue.log`, JSON.stringify(dialogue), () => console.info(dialogue.length));
 								return;
 							}
 						}
@@ -49,7 +49,7 @@ let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/publ
 				}
 			}
 
-			if (stream.event === "notification") return;
+			if (stream.event !== "notification") return;
 			
 			const notify = new Notification(stream.data);
 			console.log(notify);
