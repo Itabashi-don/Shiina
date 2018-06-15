@@ -121,10 +121,12 @@ class Generator {
 	/**
 	 * 文章を合成します
 	 * 
-	 * @param {String} word
+	 * @param {String} [word=""]
+	 * @param {Boolean} [isAdvanced=false]
+	 * 
 	 * @return {String}
 	 */
-	generate (word = "") {
+	generate (word = "", isAdvanced = false) {
 		const { structureSet } = this;
 		
 		const content = [ word ];
@@ -132,7 +134,7 @@ class Generator {
 
 		let next = word;
 		let counter = 0;
-		while ((next = this.next(next, !word ? structures[counter] : null))) {
+		while ((next = this.next(next, (!word && isAdvanced) ? structures[counter] : null))) {
 			next = next.surface_form;
 			counter++;
 
@@ -232,7 +234,7 @@ window.addEventListener("DOMContentLoaded", () => {
 			for (let i = 0; i < markovAmount.value; i++) console.log(markov.make());
 		});
 
-		fetch(`/log?type=whole`).then(res => res.json()).then(log => {
+		fetch(`/log?type=dialogue`).then(res => res.json()).then(log => {
 			console.log(log);
 			
 			for (let tokenized of log) {

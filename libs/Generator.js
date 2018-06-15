@@ -99,10 +99,12 @@ class Generator {
 	/**
 	 * 文章を合成します
 	 * 
-	 * @param {String} word
+	 * @param {String} [word=""]
+	 * @param {Boolean} [isAdvanced=false]
+	 * 
 	 * @return {String}
 	 */
-	generate (word = "") {
+	generate (word = "", isAdvanced = false) {
 		const { structureSet } = this;
 		
 		const content = [ word ];
@@ -110,7 +112,7 @@ class Generator {
 
 		let next = word;
 		let counter = 0;
-		while ((next = this.next(next, !word ? structures[counter] : null))) {
+		while ((next = this.next(next, (!word && isAdvanced) ? structures[counter] : null))) {
 			next = next.surface_form;
 			counter++;
 
@@ -125,11 +127,8 @@ class Generator {
  * @class Dictionary @extends Array
  */
 class Dictionary extends Array {
-	/**
-	 * @param {Kuromoji.IpadicFeatures[] | null} words
-	 */
-	constructor (words) {
-		super(words);
+	constructor () {
+		super();
 	}
 
 	/**
