@@ -59,12 +59,14 @@ class Markov {
 	}
 }
 
+
+
 class Generator {
 	constructor () {
+		/** @type {Dictionary} */
+		this.dictionary = new Dictionary();
 		/** @type {Object<string, Kuromoji.IpadicFeatures[]>} */
 		this.wordSet = {};
-		/** @type {Object<string, Kuromoji.IpadicFeatures[]>} */
-		this.wordSetByStructure = {};
 		/** @type {String[][]} */
 		this.structureSet = [];
 	}
@@ -74,33 +76,32 @@ class Generator {
 	 * @param {Kuromoji.IpadicFeatures[]} tokenized
 	 */
 	register (tokenized) {
-		const { wordSet, wordSetByStructure, structureSet } = this;
+		const { dictionary, wordSet, structureSet } = this;
+
+		Array.prototype.push.apply(dictionary, tokenized);
+		structureSet.push(tokenized.map(word => word.pos));
 
 		tokenized.forEach((word, index, parent) => {
 			const nowWord = word;
-			const nowStructure = nowWord.pos;
 			const prevForm = parent[index - 1] ? parent[index - 1].surface_form : "";
 
 			if (!nowWord) return;
 
 			if (!wordSet[prevForm]) wordSet[prevForm] = [];
-			if (!wordSetByStructure[nowStructure]) wordSetByStructure[nowStructure] = [];
-
 			wordSet[prevForm].push(nowWord);
-			wordSetByStructure[nowStructure].push(nowWord);
 		});
-
-		structureSet.push(tokenized.map(word => word.pos));
 	}
 
 	/**
 	 * 次に続く文字を返します
 	 * 
-	 * @param {String} word
+	 * @param {String} [word=""]
+	 * @param {String | null} [structure=null]
+	 * 
 	 * @return {Kuromoji.IpadicFeatures}
 	 */
-	next (word = "") {
-		const { wordSet, wordSetByStructure } = this;
+	next (word = "", structure = null) {
+		const { dictionary, wordSet } = this;
 
 		if (!wordSet[word]) return;
 
@@ -109,11 +110,11 @@ class Generator {
 		const currentStructure = structures[Math.floor(Math.random() * structures.length)];
 
 		if (!word) {
-			const matchedWords = wordSetByStructure[currentStructure];
+			const matchedWords = dictionary.orderByStructure(structure || currentStructure);
 			return matchedWords[Math.floor(Math.random() * matchedWords.length)];
 		}
 		
-		const matchedWords = words.filter(word => word.pos === currentStructure);
+		const matchedWords = words.filter(word => word.pos === (structure || currentStructure));
 		return matchedWords[Math.floor(Math.random() * matchedWords.length)];
 	}
 
@@ -124,15 +125,55 @@ class Generator {
 	 * @return {String}
 	 */
 	generate (word = "") {
+		const { structureSet } = this;
+		
 		const content = [ word ];
-		let next;
+		const structures = structureSet[Math.floor(Math.random() * structureSet.length)];
 
-		while ((next = this.next(word))) {
-			content.push(next.surface_form);
-			word = next.surface_form;
+		let next = word;
+		let counter = 0;
+		while ((next = this.next(next, !word ? structures[counter] : null))) {
+			next = next.surface_form;
+			counter++;
+
+			content.push(next);
 		}
 
 		return content.join("");
+	}
+}
+
+/**
+ * @class Dictionary @extends Array
+ */
+class Dictionary extends Array {
+	constructor () {
+		super();
+	}
+
+	/**
+	 * 指定された品詞の単語を返します
+	 * 
+	 * @param {String} type
+	 * @return {Kuromoji.IpadicFeatures[]}
+	 */
+	orderByStructure (type) {
+		if (!type) throw new StructureError(type);
+
+		return this.filter(word => word.pos === type);
+	}
+}
+
+/**
+ * @class StructureError @extends TypeError
+ */
+class StructureError extends TypeError {
+	/**
+	 * 品詞に関するエラーを生成します
+	 * @param {String} type
+	 */
+	constructor (type) {
+		super(`A structure type, "${type ? type : ""}" is not acceptable`);
 	}
 }
 
@@ -189,6 +230,14 @@ window.addEventListener("DOMContentLoaded", () => {
 			}
 
 			for (let i = 0; i < markovAmount.value; i++) console.log(markov.make());
+		});
+
+		fetch(`/log?type=whole`).then(res => res.json()).then(log => {
+			console.log(log);
+			
+			for (let tokenized of log) {
+				generator.register(tokenized);
+			}
 		});
 	});
 });
