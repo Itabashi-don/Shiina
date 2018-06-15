@@ -157,4 +157,6 @@ class StructureError extends TypeError {
 	}
 }
 
+
+
 module.exports = Generator;
