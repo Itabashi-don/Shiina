@@ -1,24 +1,32 @@
 const express = require("express");
+const bodyParser = require("body-parser");
 const fs = require("fs");
-const Kuromoji = require("kuromoji");
 const Mastodon = require("mastodon-api");
-const Types = require("./models/Types");
-const MorphableStatus = require("./models/MorphableStatus");
-const Notification = require("./models/Notification");
+const Kuromoji = require("kuromoji");
 
 const Initialize = require("./libs/Initialize");
+const Logger = require("./libs/Logger");
+const TokenizerPlus = require("./libs/TokenizerPlus");
+const Generator = require("./libs/Generator");
+
+const Types = require("./libs/models/Types");
+const MorphableStatus = require("./libs/models/MorphableStatus");
+const Notification = require("./libs/models/Notification");
+
+
+
 const ENV = process.env;
 
-
-
+const logger = new Logger.ArrayLogger(`${__dirname}/${ENV.SHIINA_LOGPATH}`);
 const dialogue = JSON.parse(fs.readFileSync(`${__dirname}/logs/dialogue.log`));
+const generator = new Generator(dialogue);
 
-/** @type {Kuromoji.Tokenizer<Kuromoji.IpadicFeatures>} */
+/** @type {TokenizerPlus} */
 let tokenizer = null;
 	Kuromoji.builder({ dicPath: `${__dirname}/node_modules/kuromoji/dict` }).build((error, _tokenizer) => {
 		if (error) throw error;
 
-		tokenizer = _tokenizer;
+		tokenizer = new TokenizerPlus(_tokenizer);
 		console.info("Tokenizer is ready.");
 	});
 
@@ -40,7 +48,9 @@ let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/publ
 								const tokenized = tokenizer.tokenize(status.morphableContent);
 								dialogue.push(tokenized);
 
-								fs.writeFile(`${__dirname}/logs/dialogue.log`, JSON.stringify(dialogue), () => console.info(dialogue.length));
+								fs.writeFileSync(`${__dirname}/logs/dialogue.log`, JSON.stringify(dialogue));
+								console.info(dialogue.length);
+								
 								return;
 							}
 						}
@@ -75,9 +85,56 @@ let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/publ
 
 
 let app = express();
-	app.set("PORT", ENV.SHIINA_PORT || 8001);
-
+	app.use(bodyParser.json());
 	app.use("/", express.static(`${__dirname}/views`));
+
+	app.post("/register", (req, res) => {
+		const { text } = req.body;
+
+		if (!tokenizer) {
+			res.status(503).end(JSON.stringify({
+				state: "failure",
+				error: "Tokenizer hasn't initialized."
+			}));
+
+			return;
+		}
+
+		if (!text) {
+			res.status(400).end(JSON.stringify({
+				state: "failure",
+				error: "'text'(A payload) must be String."
+			}));
+
+			return;
+		}
+
+		const tokenized = tokenizer.tokenize(text);
+		generator.register(tokenized);
+
+		res.end(JSON.stringify({
+			state: "success",
+			tokenized
+		}));
+	});
+
+	app.post("/generate", (req, res) => {
+		const { text, isAdvanced } = req.body;
+
+		res.end(JSON.stringify({
+			state: "success",
+			text: generator.generate(text, isAdvanced)
+		}));
+	});
+
+	app.post("/next", (req, res) => {
+		const { text } = req.body;
+
+		res.end(JSON.stringify({
+			state: "success",
+			word: generator.next(text)
+		}));
+	});
 
 	app.get("/log", (req, res) => {
 		const { type } = req.query;
@@ -135,8 +192,8 @@ let app = express();
 		});
 	});
 
-app.listen(app.get("PORT"), () => {
-	console.log(`[Shiina | ${ENV.SHIINA_ENV}] おはよーっ！！ポート${app.get("PORT")}で待ってるねっ♡(´˘\`๑)`);
+app.listen(ENV.SHIINA_PORT, () => {
+	console.log(`[Shiina | ${ENV.SHIINA_ENV}${ENV.SHIINA_MODE ? `(with ${ENV.SHIINA_MODE})` : ""}] おはよーっ！！ポート${ENV.SHIINA_PORT}で待ってるねっ♡(´˘\`๑)`);
 
 	if (ENV.SHIINA_ENV === "production") {
 		return mstdn.post("statuses", {

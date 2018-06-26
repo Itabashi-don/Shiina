@@ -6,13 +6,21 @@ const Kuromoji = require("kuromoji");
  * @class Generator
  */
 class Generator {
-	constructor () {
+	/**
+	 * Generatorを生成します
+	 * @param {Kuromoji.IpadicFeatures[][]} logData
+	 */
+	constructor (logData) {
 		/** @type {Dictionary} */
 		this.dictionary = new Dictionary();
 		/** @type {Object<string, Kuromoji.IpadicFeatures[]>} */
 		this.wordSet = {};
 		/** @type {String[][]} */
 		this.structureSet = [];
+
+		if (logData) {
+			for (const sentence of logData) this.register(sentence);
+		}
 	}
 
 	/**
@@ -99,28 +107,29 @@ class Dictionary extends Array {
 	}
 
 	/**
+	 * 指定された条件に合う単語を返します
+	 * 
+	 * @param {Object} conditions
+	 * @return {Dictionary}
+	 */
+	orderBy (conditions = {}) {
+		return this.filter(word => {
+			for (const prop in conditions) {
+				if (word[prop] !== conditions[prop]) return false;
+			}
+
+			return true;
+		});
+	}
+
+	/**
 	 * 指定された品詞の単語を返します
 	 * 
 	 * @param {String} type
-	 * @return {Kuromoji.IpadicFeatures[]}
+	 * @return {Dictionary}
 	 */
 	orderByStructure (type) {
-		if (!type) throw new StructureError(type);
-
 		return this.filter(word => word.pos === type);
-	}
-}
-
-/**
- * @class StructureError @extends TypeError
- */
-class StructureError extends TypeError {
-	/**
-	 * 品詞に関するエラーを生成します
-	 * @param {String} type
-	 */
-	constructor (type) {
-		super(`A structure type, "${type ? type : ""}" is not acceptable`);
 	}
 }
 
