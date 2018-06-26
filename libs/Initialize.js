@@ -9,6 +9,8 @@ class Environment {
 
 		self.SHIINA_ENV = self.SHIINA_ENV || "production";
 		self.SHIINA_MODE = self.SHIINA_MODE || "";
+		self.SHIINA_LOGPATH = self.SHIINA_LOGPATH || "logs/dialogue.log";
+		self.SHIINA_PORT = self.SHIINA_PORT || 8001;
 		
 		if (self.SHIINA_ENV == "development") require("dotenv").config();
 
@@ -34,7 +36,7 @@ class DirStructure {
 	static get JSONS () {
 		return {
 			Object: [],
-			Array: ["logs/dialogue.log"]
+			Array: []
 		};
 	}
 

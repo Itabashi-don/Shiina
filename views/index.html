@@ -3,25 +3,21 @@
 <HTML>
 	<Head>
 		<Meta Charset = "UTF-8" />
-		<Title>Tokenizer(For debugging)</Title>
+		<Title>Debugger | Shiina</Title>
 
+		<Link Rel = "StyleSheet" Href = "libs/materialize.min.css"/>
+		<Script Src = "libs/materialize.min.js"></Script>
+		
 		<Script Src = "main.js" Defer></Script>
 	</Head>
-
+	
 	<Body>
-		<Form ID = "tokenize">
-			<Textarea ID = "tokenize-text" Placeholder = "文章を入力してください"></Textarea>
-			<Input ID = "tokenize-apply" Type = "Button" Value = "分解！" />
-		</Form>
-
-		<Form ID = "import">
-			<Select ID = "import-name"></Select>
-			<Input ID = "import-apply" Type = "Button" Value = "インポート！" />
-		</Form>
-
-		<Form ID = "generator">
-			<Input ID = "generator-amount" Type = "Number" Value = "10" />件生成
-			<Input ID = "generator-apply" Type = "Button" Value = "生成！" />
-		</Form>
+		<Header Class = "navbar-fixed">
+			<Nav>
+				<Div Class = "nav-wrapper">
+					<Span Class = "brand-logo center">Debugger ―― Shiina</Span>
+				</Div>
+			</Nav>
+		</Header>
 	</Body>
 </HTML>
