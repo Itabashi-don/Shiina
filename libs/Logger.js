@@ -5,13 +5,33 @@ const iconv = require("iconv-lite");
 
 
 class Logger {
-	/** @param {String} logPath */
-	constructor (logPath) {
+	/**
+	 * エンコード変換を行います
+	 * 
+	 * @param {String} content
+	 * @param {Object} options
+	 * @param {String} [options.before="UTF-8"]
+	 * @param {String} [options.after="UTF-8"]
+	 * 
+	 * @return {String}
+	 */
+	static encode (content, options = { before: "UTF-8", after: "UTF-8" }) {
+		return iconv.decode(iconv.encode(content, options.before || "UTF-8"), options.after || "UTF-8");
+	}
+
+
+
+	/**
+	 * @param {String} logPath
+	 * @param {String} [encoding="UTF-8"]
+	 */
+	constructor (logPath, encoding = "UTF-8") {
 		if (!logPath) throw new TypeError("'logPath'(1st argument) must be String.");
 		
 		this.path = logPath;
-		if (!fs.existsSync(logPath)) fs.writeFileSync(logPath, this.initialState);
+		this.encoding = encoding;
 
+		if (!fs.existsSync(logPath)) fs.writeFileSync(logPath, Logger.encode(this.initialState, { after: encoding }));
 		this.load();
 	}
 
@@ -37,20 +57,22 @@ class Logger {
 class ArrayLogger extends Logger {
 	/**
 	 * ArrayLoggerを生成します
+	 * 
 	 * @param {String} logPath
+	 * @param {String} [encoding="UTF-8"]
 	 */
-	constructor (logPath) {
-		super(logPath);
+	constructor (logPath, encoding = "UTF-8") {
+		super(logPath, encoding);
 	}
 
 	get initialState () { return "[]"; }
 
 	load () {
 		/** @type {Array} */
-		this.log = JSON.parse(fs.readFileSync(this.path));
+		this.log = JSON.parse(Logger.encode(fs.readFileSync(this.path), { before: this.encoding }));
 	}
 
-	store () { fs.writeFileSync(this.path, JSON.stringify(this.log)); }
+	store () { fs.writeFileSync(this.path, Logger.encode(JSON.stringify(this.log), { after: this.encoding })); }
 	
 	put (obj) {
 		this.log.push(obj);
@@ -63,12 +85,13 @@ class CsvLogger extends Logger {
 	 * CSV形式文字列からArrayに変換します
 	 * 
 	 * @param {String} csvString
-	 * @param {Object} options
+	 * @param {String} [encoding="UTF-8"]
+	 * @param {Object} [options={ columns: true }]
 	 * 
 	 * @return {Promise<Array<Object> | Error>}
 	 */
-	static csvToJson (csvString, options) {
-		const parser = csv.parse(csvString, options ? options: { columns: true });
+	static csvToJson (csvString, encoding = "UTF-8", options = { columns: true }) {
+		const parser = csv.parse(Logger.encode(csvString, { before: encoding }), options);
 
 		return new Promise((resolve, reject) => {
 			const parsed = [];
@@ -84,22 +107,47 @@ class CsvLogger extends Logger {
 	}
 
 	/**
+	 * CSVファイルからArrayに変換します
+	 * 
+	 * @param {String} csvPath
+	 * @param {String} [encoding="UTF-8"]
+	 * @param {Object} [options={ columns: true }]
+	 * 
+	 * @return {Promise<Array<Object> | Error>}
+	 */
+	static csvFileToJson (csvPath, encoding = "UTF-8", options = { columns: true }) {
+		return new Promise((resolve, reject) => {
+			fs.createReadStream(csvPath)
+				.pipe(iconv.decodeStream(encoding))
+				.pipe(iconv.encodeStream("UTF-8"))
+				.pipe(
+					csv.parse((error, parsed) => {
+						if (error) reject(error);
+
+						resolve(parsed);
+					})
+				);
+		});
+	}
+
+	/**
 	 * ArrayからCSV形式文字列に変換します
 	 * 
 	 * @param {Array} jsonObj
-	 * @param {Object} options
+	 * @param {String} [encoding="UTF-8"]
+	 * @param {Object} [options={ header: true }]
 	 * 
 	 * @return {Promise<String | Error>}
 	 */
-	static jsonToCsv (jsonObj, options) {
-		const stringifier = csv.stringify(jsonObj, options ? options : { header: true });
+	static jsonToCsv (jsonObj, encoding = "UTF-8", options = { header: true }) {
+		const stringifier = csv.stringify(jsonObj, options);
 
 		return new Promise((resolve, reject) => {
 			let stringified = "";
 
 			stringifier.on("readable", () => {
 				let mem;
-				while ((mem = stringifier.read())) stringified += mem;
+				while ((mem = stringifier.read())) stringified += Logger.encode(mem, { after: encoding });
 			});
 
 			stringifier.on("error", error => reject(error));
@@ -111,10 +159,12 @@ class CsvLogger extends Logger {
 
 	/**
 	 * CsvLoggerを生成します
+	 * 
 	 * @param {String} logPath
+	 * @param {String} [encoding="UTF-8"]
 	 */
-	constructor (logPath) {
-		super(logPath);
+	constructor (logPath, encoding = "UTF-8") {
+		super(logPath, encoding);
 
 		this.initialized = false;
 	}
@@ -122,7 +172,7 @@ class CsvLogger extends Logger {
 	get initialState () { return ""; }
 
 	load () {
-		CsvLogger.csvToJson(fs.readFileSync(this.path)).then(parsed => {
+		CsvLogger.csvFileToJson(this.path, this.encoding).then(parsed => {
 			/** @type {Array<Object>} */
 			this.log = parsed;
 			this.initialized = true;
@@ -130,8 +180,13 @@ class CsvLogger extends Logger {
 	}
 
 	/** @return {Promise<void>} */
-	store () { return this.toCsv().then(stringified => fs.writeFileSync(this.path, stringified)); }
-
+	store () {
+		return CsvLogger.jsonToCsv(this.log).then(stringified => {
+			const buf = iconv.encode(stringified, this.encoding);
+			fs.writeSync(fs.openSync(this.path, "w"), buf, 0, buf.length);
+		});
+	}
+	
 	put (obj) {
 		if (!this.initialized) throw new ReferenceError("Initializing has never done yet");
 
@@ -164,7 +219,7 @@ class CsvLogger extends Logger {
 	/**
 	 * Csv形式に変換します
 	 */
-	toCsv () { return CsvLogger.jsonToCsv(this.log); }
+	toCsv () { return CsvLogger.jsonToCsv(this.log, this.encoding); }
 }
 
 
