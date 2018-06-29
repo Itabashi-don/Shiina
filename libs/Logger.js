@@ -1,14 +1,18 @@
 const fs = require("fs");
-const Iconv = require("iconv-lite");
+const csv = require("csv");
+const iconv = require("iconv-lite");
 
 
 
 class Logger {
+	/** @param {String} logPath */
 	constructor (logPath) {
 		if (!logPath) throw new TypeError("'logPath'(1st argument) must be String.");
-
+		
 		this.path = logPath;
-		if (!fs.existsSync(logPath)) fs.appendFileSync(logPath, this.initialState);
+		if (!fs.existsSync(logPath)) fs.writeFileSync(logPath, this.initialState);
+
+		this.load();
 	}
 
 	/**
@@ -16,20 +20,18 @@ class Logger {
 	 * @return {String}
 	 */
 	get initialState () { return ""; }
-	
-	/** 全ログを返します */
-	get () { return this.log; }
 
-	/** ログを再読み込みして返します */
-	reload () {
-		const { path, log } = this;
+	/** ログを読み込みます */
+	load () { this.log = null; }
 
-		this.log = JSON.parse(fs.readFileSync(path));
-		return log;
-	}
+	/** ログを保存します */
+	store () {}
 
-	/** ログを追加します */
-	put () {}
+	/**
+	 * ログを追加します
+	 * @param {Object} obj
+	 */
+	put (obj) {}
 }
 
 class ArrayLogger extends Logger {
@@ -39,83 +41,70 @@ class ArrayLogger extends Logger {
 	 */
 	constructor (logPath) {
 		super(logPath);
-
-		/** @type {Array} */
-		this.log = JSON.parse(fs.readFileSync(logPath));
 	}
 
 	get initialState () { return "[]"; }
 
-	/** @return {Array} */
-	get () { return super.get(); }
-	/** @return {Array} */
-	reload () { return super.reload(); }
+	load () {
+		/** @type {Array} */
+		this.log = JSON.parse(fs.readFileSync(this.path));
+	}
 
-	/** @param {Object} obj */
+	store () { fs.writeFileSync(this.path, JSON.stringify(this.log)); }
+	
 	put (obj) {
-		const { path, log } = this;
-
-		log.push(obj);
-		fs.writeFile(path, JSON.stringify(log), () => {});
-	}
-}
-
-class ObjectLogger extends Logger {
-	/**
-	 * ObjectLoggerを生成します
-	 * @param {String} logPath
-	 */
-	constructor (logPath) {
-		super(logPath);
-
-		/** @type {Object} */
-		this.log = JSON.parse(fs.readFileSync(logPath));
-	}
-
-	get initialState () { return "{}"; }
-
-	/** @return {Object} */
-	get () { return super.get(); }
-	/** @return {Object} */
-	reload () { return super.reload(); }
-
-	/**
-	 * @param {String} key
-	 * @param {Object} value
-	 */
-	put (key, value) {
-		const { path, log } = this;
-
-		log[key] = value;
-		fs.writeFile(path, JSON.stringify(log), () => {});
+		this.log.push(obj);
+		this.store();
 	}
 }
 
 class CsvLogger extends Logger {
 	/**
-	 * CSV形式文字列からObjectに変換します
+	 * CSV形式文字列からArrayに変換します
 	 * 
 	 * @param {String} csvString
-	 * @return {Object}
+	 * @param {Object} options
+	 * 
+	 * @return {Promise<Array<Object> | Error>}
 	 */
-	static csvToJson (csvString) {
-		csvString.split(/"([^"]+)",?/g);
+	static csvToJson (csvString, options) {
+		const parser = csv.parse(csvString, options ? options: { columns: true });
+
+		return new Promise((resolve, reject) => {
+			const parsed = [];
+
+			parser.on("readable", () => {
+				let mem;
+				while ((mem = parser.read())) parsed.push(mem);
+			});
+
+			parser.on("error", error => reject(error));
+			parser.on("end", () => resolve(parsed));
+		});
 	}
 
 	/**
-	 * ObjectからCSV形式文字列に変換します
+	 * ArrayからCSV形式文字列に変換します
 	 * 
-	 * @param {Object} jsonObj
-	 * @return {String}
+	 * @param {Array} jsonObj
+	 * @param {Object} options
+	 * 
+	 * @return {Promise<String | Error>}
 	 */
-	static jsonToCsv (jsonObj) {
-		if (!jsonObj) throw new TypeError("'jsonObj'(1st argument) must be Array or Object.");
-		const formatted = [];
+	static jsonToCsv (jsonObj, options) {
+		const stringifier = csv.stringify(jsonObj, options ? options : { header: true });
 
-		const props = Object.entries(jsonObj);
-		for (const prop of props) formatted.push(`"${prop[1]}"`);
+		return new Promise((resolve, reject) => {
+			let stringified = "";
 
-		return formatted.join(",");
+			stringifier.on("readable", () => {
+				let mem;
+				while ((mem = stringifier.read())) stringified += mem;
+			});
+
+			stringifier.on("error", error => reject(error));
+			stringifier.on("end", () => resolve(stringified));
+		});
 	}
 
 
@@ -126,11 +115,58 @@ class CsvLogger extends Logger {
 	 */
 	constructor (logPath) {
 		super(logPath);
+
+		this.initialized = false;
 	}
 
 	get initialState () { return ""; }
+
+	load () {
+		CsvLogger.csvToJson(fs.readFileSync(this.path)).then(parsed => {
+			/** @type {Array<Object>} */
+			this.log = parsed;
+			this.initialized = true;
+		});
+	}
+
+	/** @return {Promise<void>} */
+	store () { return this.toCsv().then(stringified => fs.writeFileSync(this.path, stringified)); }
+
+	put (obj) {
+		if (!this.initialized) throw new ReferenceError("Initializing has never done yet");
+
+		this.log.push(obj);
+		this.store();
+	}
+
+	/**
+	 * イベントフックを登録します
+	 * 
+	 * @param {"initialized"} eventType
+	 * @return {Promise<CsvLogger>}
+	 */
+	on (eventType) {
+		if (!eventType) throw new ReferenceError("'eventType'(1st argument) is not acceptable.");
+
+		switch (eventType) {
+			case "initialized":
+				return new Promise(resolve => {
+					const detector = setInterval(() => {
+						if (!this.initialized) return;
+
+						clearInterval(detector);
+						resolve(this);
+					}, 1);
+				});
+		}
+	}
+
+	/**
+	 * Csv形式に変換します
+	 */
+	toCsv () { return CsvLogger.jsonToCsv(this.log); }
 }
 
 
 
-module.exports = { ArrayLogger, ObjectLogger, CsvLogger };
+module.exports = { ArrayLogger, CsvLogger };
