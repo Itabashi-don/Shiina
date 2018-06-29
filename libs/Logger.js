@@ -85,13 +85,12 @@ class CsvLogger extends Logger {
 	 * CSV形式文字列からArrayに変換します
 	 * 
 	 * @param {String} csvString
-	 * @param {String} [encoding="UTF-8"]
 	 * @param {Object} [options={ columns: true }]
 	 * 
 	 * @return {Promise<Array<Object> | Error>}
 	 */
-	static csvToJson (csvString, encoding = "UTF-8", options = { columns: true }) {
-		const parser = csv.parse(Logger.encode(csvString, { before: encoding }), options);
+	static csvToJson (csvString, options = { columns: true }) {
+		const parser = csv.parse(csvString, options);
 
 		return new Promise((resolve, reject) => {
 			const parsed = [];
@@ -116,17 +115,23 @@ class CsvLogger extends Logger {
 	 * @return {Promise<Array<Object> | Error>}
 	 */
 	static csvFileToJson (csvPath, encoding = "UTF-8", options = { columns: true }) {
+		const parser = csv.parse(options);
+
 		return new Promise((resolve, reject) => {
+			const parsed = [];
+
+			parser.on("readable", () => {
+				let mem;
+				while ((mem = parser.read())) parsed.push(mem);
+			});
+
+			parser.on("error", error => reject(error));
+			parser.on("end", () => resolve(parsed));
+			
 			fs.createReadStream(csvPath)
 				.pipe(iconv.decodeStream(encoding))
 				.pipe(iconv.encodeStream("UTF-8"))
-				.pipe(
-					csv.parse((error, parsed) => {
-						if (error) reject(error);
-
-						resolve(parsed);
-					})
-				);
+				.pipe(parser);
 		});
 	}
 
@@ -134,12 +139,11 @@ class CsvLogger extends Logger {
 	 * ArrayからCSV形式文字列に変換します
 	 * 
 	 * @param {Array} jsonObj
-	 * @param {String} [encoding="UTF-8"]
 	 * @param {Object} [options={ header: true }]
 	 * 
 	 * @return {Promise<String | Error>}
 	 */
-	static jsonToCsv (jsonObj, encoding = "UTF-8", options = { header: true }) {
+	static jsonToCsv (jsonObj, options = { header: true }) {
 		const stringifier = csv.stringify(jsonObj, options);
 
 		return new Promise((resolve, reject) => {
@@ -147,7 +151,7 @@ class CsvLogger extends Logger {
 
 			stringifier.on("readable", () => {
 				let mem;
-				while ((mem = stringifier.read())) stringified += Logger.encode(mem, { after: encoding });
+				while ((mem = stringifier.read())) stringified += mem;
 			});
 
 			stringifier.on("error", error => reject(error));
@@ -219,7 +223,7 @@ class CsvLogger extends Logger {
 	/**
 	 * Csv形式に変換します
 	 */
-	toCsv () { return CsvLogger.jsonToCsv(this.log, this.encoding); }
+	toCsv () { return CsvLogger.jsonToCsv(this.log); }
 }
 
 
