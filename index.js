@@ -2,7 +2,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const fs = require("fs");
 const Mastodon = require("mastodon-api");
-const Kuromoji = require("kuromoji");
 
 const Initialize = require("./libs/Initialize");
 const Logger = require("./libs/Logger");
@@ -15,21 +14,28 @@ const Notification = require("./libs/models/Notification");
 
 
 
+/**
+ * @typedef {Object} ShiinaEnv
+ * @prop {String} SHIINA_INSTANCE 動作させるアカウントがあるインスタンスのURL
+ * @prop {String} SHIINA_TOKEN 動作させるアカウントのトークン
+ * @prop {String} SHIINA_ENV 動作環境
+ * @prop {String} SHIINA_MODE 動作モード
+ * @prop {String} SHIINA_LOGPATH 学習状況を保存するファイルのパス
+ * @prop {Number} SHIINA_PORT Shiinaを動かすポート
+ */
+
+/** @const {ShiinaEnv} */
 const ENV = process.env;
 
-const logger = new Logger.ArrayLogger(`${__dirname}/${ENV.SHIINA_LOGPATH}`);
+//const logger = new Logger.ArrayLogger(`${__dirname}/${ENV.SHIINA_LOGPATH}`);
 const dialogue = JSON.parse(fs.readFileSync(`${__dirname}/logs/dialogue.log`));
 const generator = new Generator(dialogue);
 
-/** @type {TokenizerPlus} */
-let tokenizer = null;
-	Kuromoji.builder({ dicPath: `${__dirname}/node_modules/kuromoji/dict` }).build((error, _tokenizer) => {
-		if (error) throw error;
+/** @const {TokenizerPlus} */
+let tokenizer = new TokenizerPlus({ dicPath: `${__dirname}/node_modules/kuromoji/dict` });
+	tokenizer.on("initialized").then(() => console.info("Tokenizer is ready."));
 
-		tokenizer = new TokenizerPlus(_tokenizer);
-		console.info("Tokenizer is ready.");
-	});
-
+/** @const {Mastodon} */
 const mstdn = new Mastodon({ api_url: `${ENV.SHIINA_INSTANCE}/api/v1/`, access_token: ENV.SHIINA_TOKEN });
 
 let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/public" : "streaming/user");
@@ -38,32 +44,25 @@ let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/publ
 	homeTimeline.on("message",
 		/** @param {Types.Stream} stream */
 		stream => {
-			if (ENV.SHIINA_ENV === "development") {
-				switch (ENV.SHIINA_MODE) {
-					case "learning":
-						if (stream.event === "update" && tokenizer) {
-							const status = new MorphableStatus(stream.data);
-							
-							if (!status.account.bot && status.language === "ja") {
-								const tokenized = tokenizer.tokenize(status.morphableContent);
-								dialogue.push(tokenized);
+			if (ENV.SHIINA_ENV === "development" && ENV.SHIINA_MODE === "learning") {
+				if (stream.event === "update" && tokenizer.initialized) {
+					const status = new MorphableStatus(stream.data);
+					
+					if (!status.account.bot && status.language === "ja") {
+						const tokenized = tokenizer.tokenize(status.morphableContent);
+						dialogue.push(tokenized);
 
-								fs.writeFileSync(`${__dirname}/logs/dialogue.log`, JSON.stringify(dialogue));
-								console.info(dialogue.length);
-								
-								return;
-							}
-						}
+						fs.writeFileSync(`${__dirname}/logs/dialogue.log`, JSON.stringify(dialogue));
+						console.info(dialogue.length);
 						
-						break;
+						return;
+					}
 				}
 			}
 
 			if (stream.event !== "notification") return;
 			
 			const notify = new Notification(stream.data);
-			console.log(notify);
-
 			if (notify.type === "mention") {
 				const { account, id, sensitive, spoiler_text, visibility } = notify.status;
 
@@ -91,7 +90,7 @@ let app = express();
 	app.post("/register", (req, res) => {
 		const { text } = req.body;
 
-		if (!tokenizer) {
+		if (!tokenizer.initialized) {
 			res.status(503).end(JSON.stringify({
 				state: "failure",
 				error: "Tokenizer hasn't initialized."
@@ -136,19 +135,6 @@ let app = express();
 		}));
 	});
 
-	app.get("/log", (req, res) => {
-		const { type } = req.query;
-		const logPath = `${__dirname}/logs/${type}.log`;
-
-		if (!fs.existsSync(logPath)) throw new TypeError(`${logPath}は存在しません。`);
-
-		fs.readFile(logPath, (error, log) => {
-			if (error) throw error;
-			
-			res.end(log);
-		});
-	});
-
 	app.get("/tokenize", (req, res) => {
 		const { text, mode } = req.query;
 
@@ -156,7 +142,6 @@ let app = express();
 
 		if (!mode || mode === "short") {
 			res.end(JSON.stringify(tokenized));
-			return;
 		} else if (mode === "long") {
 			const sentences = [];
 
@@ -170,26 +155,7 @@ let app = express();
 			sentences.push(tokenized.slice(i1, tokenized.length));
 
 			res.end(JSON.stringify(sentences));
-			return;
 		}
-	});
-
-	app.get("/sample", (req, res) => {
-		const { name } = req.query;
-
-		fs.readFile(`${__dirname}/samples/${name}`, "UTF-8", (error, text) => {
-			if (error) throw error;
-
-			res.end(JSON.stringify(text.split(/\r?\n/)));
-		});
-	});
-
-	app.get("/samples", (req, res) => {
-		fs.readdir(`${__dirname}/samples`, (error, files) => {
-			if (error) throw error;
-
-			res.end(JSON.stringify(files));
-		});
 	});
 
 app.listen(ENV.SHIINA_PORT, () => {

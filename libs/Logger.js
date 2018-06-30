@@ -4,6 +4,7 @@ const iconv = require("iconv-lite");
 
 
 
+/** @class Logger */
 class Logger {
 	/**
 	 * エンコード変換を行います
@@ -54,6 +55,7 @@ class Logger {
 	put (obj) {}
 }
 
+/** @class ArrayLogger @extends Logger */
 class ArrayLogger extends Logger {
 	/**
 	 * ArrayLoggerを生成します
@@ -80,6 +82,7 @@ class ArrayLogger extends Logger {
 	}
 }
 
+/** @class CsvLogger @extends Logger */
 class CsvLogger extends Logger {
 	/**
 	 * CSV形式文字列からArrayに変換します
@@ -192,14 +195,12 @@ class CsvLogger extends Logger {
 	}
 	
 	put (obj) {
-		if (!this.initialized) throw new ReferenceError("Initializing has never done yet");
-
 		this.log.push(obj);
 		this.store();
 	}
 
 	/**
-	 * イベントフックを登録します
+	 * イベントを登録します
 	 * 
 	 * @param {"initialized"} eventType
 	 * @return {Promise<CsvLogger>}

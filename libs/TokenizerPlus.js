@@ -3,17 +3,42 @@ const negaposiAnalyze = require("negaposi-analyzer-ja");
 
 
 
-
-/**
- * @class TokenizerPlus
- */
+/** @class TokenizerPlus */
 class TokenizerPlus {
 	/**
 	 * TokenizerPlusを生成します
-	 * @param {Kuromoji.Tokenizer<Kuromoji.IpadicFeatures>} kuromojiTokenizer
+	 * @param {Kuromoji.TokenizerBuilderOption} option
 	 */
-	constructor (kuromojiTokenizer) {
-		this.self = kuromojiTokenizer;
+	constructor (option) {
+		this.self = null;
+
+		Kuromoji.builder(option).build((error, tokenizer) => {
+			if (error) throw error;
+
+			this.self = tokenizer;
+		});
+	}
+
+	get initialized () { return this.self ? true : false; }
+
+	/**
+	 * イベントを登録します
+	 * 
+	 * @param {"initialized"} eventType
+	 * @return {Promise<TokenizerPlus>}
+	 */
+	on (eventType) {
+		switch (eventType) {
+			case "initialized":
+				return new Promise(resolve => {
+					const detector = setInterval(() => {
+						if (!this.initialized) return;
+
+						clearInterval(detector);
+						resolve(this);
+					});
+				});
+		}
 	}
 
 	/**

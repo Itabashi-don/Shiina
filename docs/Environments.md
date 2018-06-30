@@ -32,4 +32,4 @@
 
 
 ### SHIINA_PORT(Number型) <初期値: `8001`>
-Willを動かすポート
+Shiinaを動かすポート
