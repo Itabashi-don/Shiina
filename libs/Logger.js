@@ -34,6 +34,8 @@ class Logger {
 
 		if (!fs.existsSync(logPath)) fs.writeFileSync(logPath, Logger.encode(this.initialState, { after: encoding }));
 		this.load();
+
+		setInterval(() => this.store(), 10000);
 	}
 
 	/**
@@ -54,6 +56,44 @@ class Logger {
 	 */
 	put (obj) {}
 }
+
+/** @class AsyncLogger @extends Logger */
+class AsyncLogger extends Logger {
+	/**
+	 * @param {String} logPath
+	 * @param {String} [encoding="UTF-8"]
+	 */
+	constructor (logPath, encoding = "UTF-8") {
+		super(logPath, encoding);
+
+		this.initialized = false;
+	}
+
+	/**
+	 * イベントを登録します
+	 * 
+	 * @param {"initialized"} eventType
+	 * @return {Promise<AsyncLogger>}
+	 */
+	on (eventType) {
+		switch (eventType) {
+			default:
+				throw new ReferenceError("'eventType'(1st argument) is not acceptable.");
+
+			case "initialized":
+				return new Promise(resolve => {
+					const detector = setInterval(() => {
+						if (!this.initialized) return;
+
+						clearInterval(detector);
+						resolve(this);
+					}, 1);
+				});
+		}
+	}
+}
+
+
 
 /** @class ArrayLogger @extends Logger */
 class ArrayLogger extends Logger {
@@ -82,15 +122,60 @@ class ArrayLogger extends Logger {
 	}
 }
 
-/** @class CsvLogger @extends Logger */
-class CsvLogger extends Logger {
+/** @class AsyncArrayLogger @extends AsyncLogger */
+class AsyncArrayLogger extends AsyncLogger {
+	/**
+	 * AsyncArrayLoggerを生成します
+	 * 
+	 * @param {String} logPath
+	 * @param {String} [encoding="UTF-8"]
+	 */
+	constructor (logPath, encoding = "UTF-8") {
+		super(logPath, encoding);
+	}
+
+	get initialState () { return "[]"; }
+
+	/** @return {Promise<void>} */
+	load () {
+		return new Promise((resolve, reject) => {
+			fs.readFile(this.path, (error, data) => {
+				if (error) reject(error);
+
+				/** @type {Array} */
+				this.log = JSON.parse(Logger.encode(data, { before: this.encoding }));
+				this.initialized = true;
+
+				resolve();
+			});
+		});
+	}
+
+	/** @return {Promise<void>} */
+	store () {
+		const buf = iconv.encode(JSON.stringify(this.log), this.encoding);
+
+		return new Promise((resolve, reject) => {
+			fs.write(fs.openSync(this.path, "w"), buf, 0, buf.length, error => {
+				if (error) reject(error);
+
+				resolve();
+			});
+		});
+	}
+
+	put (obj) { this.log.push(obj); }
+}
+
+/** @class CsvLogger @extends AsyncLogger */
+class CsvLogger extends AsyncLogger {
 	/**
 	 * CSV形式文字列からArrayに変換します
 	 * 
 	 * @param {String} csvString
 	 * @param {Object} [options={ columns: true }]
 	 * 
-	 * @return {Promise<Array<Object> | Error>}
+	 * @return {Promise<Array<Object>>}
 	 */
 	static csvToJson (csvString, options = { columns: true }) {
 		const parser = csv.parse(csvString, options);
@@ -115,7 +200,7 @@ class CsvLogger extends Logger {
 	 * @param {String} [encoding="UTF-8"]
 	 * @param {Object} [options={ columns: true }]
 	 * 
-	 * @return {Promise<Array<Object> | Error>}
+	 * @return {Promise<Array<Object>>}
 	 */
 	static csvFileToJson (csvPath, encoding = "UTF-8", options = { columns: true }) {
 		const parser = csv.parse(options);
@@ -144,7 +229,7 @@ class CsvLogger extends Logger {
 	 * @param {Array} jsonObj
 	 * @param {Object} [options={ header: true }]
 	 * 
-	 * @return {Promise<String | Error>}
+	 * @return {Promise<String>}
 	 */
 	static jsonToCsv (jsonObj, options = { header: true }) {
 		const stringifier = csv.stringify(jsonObj, options);
@@ -172,61 +257,34 @@ class CsvLogger extends Logger {
 	 */
 	constructor (logPath, encoding = "UTF-8") {
 		super(logPath, encoding);
-
-		this.initialized = false;
 	}
 
 	get initialState () { return ""; }
 
 	load () {
-		CsvLogger.csvFileToJson(this.path, this.encoding).then(parsed => {
+		return CsvLogger.csvFileToJson(this.path, this.encoding).catch(error => { throw error; }).then(parsed => {
 			/** @type {Array<Object>} */
 			this.log = parsed;
 			this.initialized = true;
 		});
 	}
-
-	/** @return {Promise<void>} */
+	
 	store () {
-		return CsvLogger.jsonToCsv(this.log).then(stringified => {
+		return this.toCsv().catch(error => { throw error; }).then(stringified => {
 			const buf = iconv.encode(stringified, this.encoding);
 			fs.writeSync(fs.openSync(this.path, "w"), buf, 0, buf.length);
 		});
 	}
 	
-	put (obj) {
-		this.log.push(obj);
-		this.store();
-	}
-
-	/**
-	 * イベントを登録します
-	 * 
-	 * @param {"initialized"} eventType
-	 * @return {Promise<CsvLogger>}
-	 */
-	on (eventType) {
-		if (!eventType) throw new ReferenceError("'eventType'(1st argument) is not acceptable.");
-
-		switch (eventType) {
-			case "initialized":
-				return new Promise(resolve => {
-					const detector = setInterval(() => {
-						if (!this.initialized) return;
-
-						clearInterval(detector);
-						resolve(this);
-					}, 1);
-				});
-		}
-	}
+	put (obj) { this.log.push(obj); }
 
 	/**
 	 * Csv形式に変換します
+	 * @return {Promise<String>}
 	 */
 	toCsv () { return CsvLogger.jsonToCsv(this.log); }
 }
 
 
 
-module.exports = { ArrayLogger, CsvLogger };
+module.exports = { ArrayLogger, AsyncArrayLogger, CsvLogger };
