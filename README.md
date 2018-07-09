@@ -1,5 +1,5 @@
-# Shiina(Powered by Will)
-![](/assets/Shiina.jpg)
+# Shiina
+![](/docs/assets/Shiina.jpg)
 
 I'm a girl, named "Shiina", living in Itabashi.
 

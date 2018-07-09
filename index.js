@@ -8,8 +8,8 @@ const TokenizerPlus = require("./libs/TokenizerPlus");
 const Generator = require("./libs/Generator");
 
 const Types = require("./models/Types");
-const MorphableStatus = require("./MorphableStatus");
-const Notification = require("./Notification");
+const MorphableStatus = require("./models/MorphableStatus");
+const Notification = require("./models/Notification");
 
 
 

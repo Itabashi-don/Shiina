@@ -1,5 +1,5 @@
-# しいな ― Shiina(Powered by Will)
-![](/assets/Shiina.jpg)
+# しいな ― Shiina
+![](/docs/assets/Shiina.jpg)
 
 板橋在住の女子高生、しいちゃんです。
 

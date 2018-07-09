@@ -62,5 +62,5 @@ typings/
 
 # Debug files
 dict/
-test/
+tests/
 samples/
