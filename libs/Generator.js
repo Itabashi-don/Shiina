@@ -18,9 +18,7 @@ class Generator {
 		/** @type {String[][]} */
 		this.structureSet = [];
 
-		if (logData) {
-			for (const sentence of logData) this.register(sentence);
-		}
+		if (logData) this.importLog(logData);
 	}
 
 	/**
@@ -42,6 +40,14 @@ class Generator {
 			if (!wordSet[prevForm]) wordSet[prevForm] = [];
 			wordSet[prevForm].push(nowWord);
 		});
+	}
+
+	/**
+	 * ログを取り込みます
+	 * @param {Kuromoji.IpadicFeatures[][]} logData
+	 */
+	importLog (logData) {
+		for (const sentence of logData) this.register(sentence);
 	}
 
 	/**

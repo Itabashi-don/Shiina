@@ -2,13 +2,24 @@ const fs = require("fs");
 
 
 
+/**
+ * @typedef {Object} ShiinaEnv
+ * @prop {String} SHIINA_INSTANCE 動作させるアカウントがあるインスタンスのURL
+ * @prop {String} SHIINA_TOKEN 動作させるアカウントのトークン
+ * @prop {"production" | "development"} [SHIINA_ENV="production"] 動作環境
+ * @prop {"" | "learning" | "debug"} [SHIINA_MODE=""] 動作モード
+ * @prop {String} [SHIINA_LOGPATH="logs/dialogue.log"] 学習状況を保存するファイルのパス
+ * @prop {Number} [SHIINA_PORT=8001] Shiinaを動かすポート
+ */
+
 class Environment {
 	//Initialization of environment
 	static init () {
+		/** @type {ShiinaEnv} */
 		const self = process.env;
 
 		self.SHIINA_ENV = self.SHIINA_ENV || "production";
-		self.SHIINA_MODE = self.SHIINA_MODE || "";
+		self.SHIINA_MODE = (self.SHIINA_ENV === "development" && self.SHIINA_MODE) || "";
 		self.SHIINA_LOGPATH = self.SHIINA_LOGPATH || "logs/dialogue.log";
 		self.SHIINA_PORT = self.SHIINA_PORT || 8001;
 		
@@ -31,7 +42,7 @@ class EnvironmentError extends TypeError {
 
 
 class DirStructure {
-	static get DIRS () { return ["samples", "logs"]; }
+	static get DIRS () { return ["logs"]; }
 	static get FILES () { return []; }
 	static get JSONS () {
 		return {

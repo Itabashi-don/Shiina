@@ -49,7 +49,7 @@ class TokenizerPlus {
 	 */
 	tokenize (text) {
 		const { self } = this;
-
+		
 		const tokenized = self.tokenize(text);
 		tokenized.forEach((word, index) => tokenized[index].feeling = negaposiAnalyze([ word ]));
 

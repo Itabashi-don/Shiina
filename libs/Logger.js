@@ -42,10 +42,16 @@ class Logger {
 	 * ログファイルの初期値
 	 * @return {String}
 	 */
-	get initialState () { return ""; }
+	get initialState () { return "" }
+
+	/**
+	 * ログの蓄積数
+	 * @return {Number}
+	 */
+	get length () { return this.log && this.log.length }
 
 	/** ログを読み込みます */
-	load () { this.log = null; }
+	load () { this.log = null }
 
 	/** ログを保存します */
 	store () {}
@@ -107,7 +113,7 @@ class ArrayLogger extends Logger {
 		super(logPath, encoding);
 	}
 
-	get initialState () { return "[]"; }
+	get initialState () { return "[]" }
 
 	load () {
 		/** @type {Array} */
@@ -134,7 +140,7 @@ class AsyncArrayLogger extends AsyncLogger {
 		super(logPath, encoding);
 	}
 
-	get initialState () { return "[]"; }
+	get initialState () { return "[]" }
 
 	/** @return {Promise<void>} */
 	load () {
@@ -259,10 +265,10 @@ class CsvLogger extends AsyncLogger {
 		super(logPath, encoding);
 	}
 
-	get initialState () { return ""; }
+	get initialState () { return "" }
 
 	load () {
-		return CsvLogger.csvFileToJson(this.path, this.encoding).catch(error => { throw error; }).then(parsed => {
+		return CsvLogger.csvFileToJson(this.path, this.encoding).catch(error => { throw error }).then(parsed => {
 			/** @type {Array<Object>} */
 			this.log = parsed;
 			this.initialized = true;
@@ -270,19 +276,19 @@ class CsvLogger extends AsyncLogger {
 	}
 	
 	store () {
-		return this.toCsv().catch(error => { throw error; }).then(stringified => {
+		return this.toCsv().catch(error => { throw error }).then(stringified => {
 			const buf = iconv.encode(stringified, this.encoding);
 			fs.writeSync(fs.openSync(this.path, "w"), buf, 0, buf.length);
 		});
 	}
 	
-	put (obj) { this.log.push(obj); }
+	put (obj) { this.log.push(obj) }
 
 	/**
 	 * Csv形式に変換します
 	 * @return {Promise<String>}
 	 */
-	toCsv () { return CsvLogger.jsonToCsv(this.log); }
+	toCsv () { return CsvLogger.jsonToCsv(this.log) }
 }
 
 

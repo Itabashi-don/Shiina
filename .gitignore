@@ -61,5 +61,6 @@ typings/
 .next
 
 # Debug files
+dict/
+test/
 samples/
-tests/
