@@ -1,0 +1,56 @@
+<!DocType HTML>
+
+<HTML>
+	<Head>
+		<Meta Charset = "UTF-8" />
+		<Title>Tokenizer | Shiina Debugger Portal</Title>
+
+		<Link Rel = "StyleSheet" Href = "/libs/materialize.min.css"/>
+		<Script Src = "/libs/materialize.min.js"></Script>
+		
+		<Link Rel = "StyleSheet" Href = "/libs/common.css" />
+		<Script Src = "tokenizer.js" Defer></Script>
+	</Head>
+	
+	<Body>
+		<Header Class = "navbar-fixed">
+			<Nav>
+				<Div Class = "nav-wrapper">
+					<Span Class = "brand-logo center">Tokenizer | Shiina Debugger Portal</Span>
+				</Div>
+			</Nav>
+		</Header>
+
+		<Main ID = "tokenizer">
+			<Div Class = "input-field">
+				<Textarea ID = "tokenizer-text" Class = "materialize-textarea"></Textarea>
+				<Label For = "tokenizer-text">解析する文章を入力してください</Label>
+
+				<Button ID = "tokenizer-tokenize" Class = "btn waves-effect waves-light">解析</Button>
+			</Div>
+
+			<Table ID = "tokenizer-result" Class = "highlight">
+				<THead>
+					<Tr>
+						<Th>surface_form</Th>
+						<Th>left_id</Th>
+						<Th>right_id</Th>
+						<Th>word_cost</Th>
+						<Th>pos</Th>
+						<Th>pos_detail_1</Th>
+						<Th>pos_detail_2</Th>
+						<Th>pos_detail_3</Th>
+						<Th>conjugated_type</Th>
+						<Th>conjugated_form</Th>
+						<Th>basic_form</Th>
+						<Th>reading</Th>
+						<Th>pronunciation</Th>
+					</Tr>
+				</THead>
+
+				<TBody>
+				</TBody>
+			</Table>
+		</Main>
+	</Body>
+</HTML>

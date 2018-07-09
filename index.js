@@ -1,3 +1,4 @@
+const childProcess = require("child_process");
 const express = require("express");
 const bodyParser = require("body-parser");
 const Mastodon = require("mastodon-api");
@@ -126,8 +127,8 @@ let app = express();
 		}));
 	});
 
-	app.get("/tokenize", (req, res) => {
-		const { text, mode } = req.query;
+	app.post("/tokenize", (req, res) => {
+		const { text, mode } = req.body;
 
 		const tokenized = tokenizer.tokenize(text);
 
