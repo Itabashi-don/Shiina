@@ -20,7 +20,7 @@ const dialogue = new Logger.ArrayLogger(`${__dirname}/${ENV.SHIINA_LOGPATH}`);
 const generator = new Generator(dialogue.log);
 
 /** @type {TokenizerPlus} */
-const tokenizer = new TokenizerPlus({ dicPath: `${__dirname}/node_modules/kuromoji/dict` });
+const tokenizer = new TokenizerPlus({ dicPath: `${__dirname}/dict` });
 tokenizer.on("initialized").then(() => console.info("Tokenizer has been ready."));
 
 /** @type {Mastodon} */

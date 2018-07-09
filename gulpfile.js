@@ -7,11 +7,12 @@ const del = require("del");
 const sequence = require("run-sequence");
 const IPADic = require("mecab-ipadic-seed");
 const kuromoji = require("kuromoji");
+const Logger = require("./libs/Logger");
 
 
 
 gulp.task("clean-dict", done => {
-	return del([ "dict/" ], done);
+	return del([ "dict/*.gz" ], done);
 });
 
 gulp.task("create-dat-files", done => {
@@ -25,7 +26,7 @@ gulp.task("create-dat-files", done => {
 		const ab = typed.buffer;
 		const buffer = new Buffer(ab.byteLength);
 		const view = new Uint8Array(ab);
-		for (var i = 0; i < buffer.length; ++i) {
+		for (let i = 0; i < buffer.length; ++i) {
 			buffer[i] = view[i];
 		}
 		return buffer;
@@ -34,35 +35,51 @@ gulp.task("create-dat-files", done => {
 	const dic = new IPADic();
 	const builder = kuromoji.dictionaryBuilder();
 
-	// Build token info dictionary
-	const tokenInfoPromise = dic.readTokenInfo(line => {
-		builder.addTokenInfoDictionary(line);
-	}).then(() => {
-		builder.addTokenInfoDictionary(
-			["変態糞土方", 1285, 1285, 65535, "名詞", "固有名詞", "*", "*", "*", "*", "変態糞土方", "ヘンタイクソドカタ", "ヘンタイクソドカタ"].join(",")
-		);
-		
-		console.log("Finished reading token info dics");
-	});
+	const userDic = new Logger.CsvLogger("dict/userDic.csv", "Shift-JIS");
+	userDic.on("initialized").then(userDic => {
+		// Build token info dictionary
+		const tokenInfoPromise = dic.readTokenInfo(line => builder.addTokenInfoDictionary(line)).then(() => {
+			if (userDic.length) {
+				for (const token of userDic.log) {
+					const {
+						surface_form,
+						left_id,
+						right_id,
+						word_cost,
+						pos,
+						pos_detail_1,
+						pos_detail_2,
+						pos_detail_3,
+						conjugated_type,
+						conjugated_form,
+						basic_form,
+						reading,
+						pronunciation
+					} = token;
 
-	// Build connection costs matrix
-	const matrixDefPromise = dic.readMatrixDef(line => builder.putCostMatrixLine(line)).then(() => console.log("Finished reading matrix.def"));
-	// Build unknown dictionary
-	const unkDefPromise = dic.readUnkDef(line => builder.putUnkDefLine(line)).then(() => console.log("Finished reading unk.def"));
-	// Build character definition dictionary
-	const charDefPromise = dic.readCharDef(line => builder.putCharDefLine(line)).then(() => console.log("Finished reading char.def"));
+					builder.addTokenInfoDictionary([ surface_form, left_id, right_id, word_cost, pos, pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form, basic_form, reading, pronunciation ].join(","));
+				}
+			}
 
-	// Build kuromoji.js binary dictionary
-	return Promise.all([ tokenInfoPromise, matrixDefPromise, unkDefPromise, charDefPromise ]).then(() => {
-		console.log("Finished reading all seed dictionary files");
-		console.log("Building binary dictionary ...");
+			userDic.close();
+			console.log("Finished reading token info dics");
+		});
 
-		return builder.build();
+		// Build connection costs matrix
+		const matrixDefPromise = dic.readMatrixDef(line => builder.putCostMatrixLine(line)).then(() => console.log("Finished reading matrix.def"));
+		// Build unknown dictionary
+		const unkDefPromise = dic.readUnkDef(line => builder.putUnkDefLine(line)).then(() => console.log("Finished reading unk.def"));
+		// Build character definition dictionary
+		const charDefPromise = dic.readCharDef(line => builder.putCharDefLine(line)).then(() => console.log("Finished reading char.def"));
+
+		// Build kuromoji.js binary dictionary
+		return Promise.all([ tokenInfoPromise, matrixDefPromise, unkDefPromise, charDefPromise ]).then(() => {
+			console.log("Finished reading all seed dictionary files");
+			console.log("Building binary dictionary ...");
+
+			return builder.build();
+		});
 	}).then(dic => {
-		console.info(dic.token_info_dictionary.getFeatures(3921260));
-
-		
-
 		const base_buffer = toBuffer(dic.trie.bc.getBaseBuffer());
 		const check_buffer = toBuffer(dic.trie.bc.getCheckBuffer());
 		const token_info_buffer = toBuffer(dic.token_info_dictionary.dictionary.buffer);

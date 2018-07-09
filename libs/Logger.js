@@ -35,7 +35,7 @@ class Logger {
 		if (!fs.existsSync(logPath)) fs.writeFileSync(logPath, Logger.encode(this.initialState, { after: encoding }));
 		this.load();
 
-		setInterval(() => this.store(), 10000);
+		this._storeTimer = setInterval(() => this.store(), 10000);
 	}
 
 	/**
@@ -61,6 +61,15 @@ class Logger {
 	 * @param {Object} obj
 	 */
 	put (obj) {}
+
+	/**
+	 * Loggerを閉じます
+	 * @return {undefined}
+	 */
+	close () {
+		clearInterval(this._storeTimer);
+		return undefined;
+	}
 }
 
 /** @class AsyncLogger @extends Logger */
@@ -179,7 +188,8 @@ class CsvLogger extends AsyncLogger {
 	 * CSV形式文字列からArrayに変換します
 	 * 
 	 * @param {String} csvString
-	 * @param {Object} [options={ columns: true }]
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.columns=true]
 	 * 
 	 * @return {Promise<Array<Object>>}
 	 */
@@ -204,7 +214,8 @@ class CsvLogger extends AsyncLogger {
 	 * 
 	 * @param {String} csvPath
 	 * @param {String} [encoding="UTF-8"]
-	 * @param {Object} [options={ columns: true }]
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.columns=true]
 	 * 
 	 * @return {Promise<Array<Object>>}
 	 */
@@ -233,7 +244,8 @@ class CsvLogger extends AsyncLogger {
 	 * ArrayからCSV形式文字列に変換します
 	 * 
 	 * @param {Array} jsonObj
-	 * @param {Object} [options={ header: true }]
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.header=true]
 	 * 
 	 * @return {Promise<String>}
 	 */
@@ -260,15 +272,19 @@ class CsvLogger extends AsyncLogger {
 	 * 
 	 * @param {String} logPath
 	 * @param {String} [encoding="UTF-8"]
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.columns=true]
 	 */
-	constructor (logPath, encoding = "UTF-8") {
+	constructor (logPath, encoding = "UTF-8", options = { columns: true }) {
 		super(logPath, encoding);
+
+		this.options = options;
 	}
 
 	get initialState () { return "" }
 
 	load () {
-		return CsvLogger.csvFileToJson(this.path, this.encoding).catch(error => { throw error }).then(parsed => {
+		return CsvLogger.csvFileToJson(this.path, this.encoding, this.options).catch(error => { throw error }).then(parsed => {
 			/** @type {Array<Object>} */
 			this.log = parsed;
 			this.initialized = true;

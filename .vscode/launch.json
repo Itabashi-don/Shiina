@@ -8,7 +8,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "しいちゃん、おはよっ！！",
-			"program": "${workspaceFolder}\\index.js",
+			"program": "${workspaceFolder}/index.js",
 
 			"env": {
 				"SHIINA_ENV": "development",
@@ -20,7 +20,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "しいちゃん、お勉強しよ！！",
-			"program": "${workspaceFolder}\\index.js",
+			"program": "${workspaceFolder}/index.js",
 
 			"env": {
 				"SHIINA_ENV": "development",
