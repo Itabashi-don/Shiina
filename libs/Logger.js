@@ -4,6 +4,10 @@ const iconv = require("iconv-lite");
 
 
 
+/**
+ * @typedef {"initialized"} AsyncLoggerEvent
+ */
+
 /** @class Logger */
 class Logger {
 	/**
@@ -87,7 +91,7 @@ class AsyncLogger extends Logger {
 	/**
 	 * イベントを登録します
 	 * 
-	 * @param {"initialized"} eventType
+	 * @param {AsyncLoggerEvent} eventType
 	 * @return {Promise<AsyncLogger>}
 	 */
 	on (eventType) {
@@ -150,6 +154,12 @@ class AsyncArrayLogger extends AsyncLogger {
 	}
 
 	get initialState () { return "[]" }
+
+	/**
+	 * @param {AsyncLoggerEvent} eventType
+	 * @return {Promise<AsyncArrayLogger>}
+	 */
+	on (eventType) { return super.on(eventType) }
 
 	/** @return {Promise<void>} */
 	load () {
@@ -282,6 +292,12 @@ class CsvLogger extends AsyncLogger {
 	}
 
 	get initialState () { return "" }
+
+	/**
+	 * @param {AsyncLoggerEvent} eventType
+	 * @return {Promise<CsvLogger>}
+	 */
+	on (eventType) { return super.on(eventType) }
 
 	load () {
 		return CsvLogger.csvFileToJson(this.path, this.encoding, this.options).catch(error => { throw error }).then(parsed => {

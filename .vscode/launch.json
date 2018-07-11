@@ -26,6 +26,31 @@
 				"SHIINA_ENV": "development",
 				"SHIINA_MODE": "learning"
 			}
+		},
+
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "LearningTest",
+			"program": "${workspaceFolder}/tests/LearningTest.js",
+
+			"env": {
+				"SHIINA_ENV": "development",
+				"SHIINA_MODE": ""
+			}
+		},
+
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "GeneratingTest",
+			"program": "${workspaceFolder}/tests/GeneratingTest.js",
+
+			"env": {
+				"SHIINA_ENV": "development",
+				"SHIINA_MODE": "",
+				"SHIINA_LOGPATH": "logs/Genboo.log"
+			}
 		}
 	]
 }

@@ -14,6 +14,16 @@ const Notification = require("./models/Notification");
 
 
 
+/**
+ * 名詞2つ以上連続
+ * (名詞/接尾があればそこで区切る)
+ * 
+ * 北園高校は東京都板橋区にあります。
+ * > 北園 + 高校
+ * > 東京 + 都(接尾)
+ * > 板橋 + 区(接尾)
+ */
+
 /** @type {Initialize.ShiinaEnv} */
 const ENV = process.env;
 
