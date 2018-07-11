@@ -3,7 +3,10 @@ const Kuromoji = require("kuromoji");
 
 
 /**
+ * 学習データを基にして文章合成を行うクラス
+ * 
  * @class Generator
+ * @author Genbu Hase
  */
 class Generator {
 	/**
@@ -31,14 +34,14 @@ class Generator {
 		Array.prototype.push.apply(dictionary, tokenized);
 		structureSet.push(tokenized.map(word => word.pos));
 
-		tokenized.forEach((word, index, parent) => {
-			const nowWord = word;
-			const prevForm = parent[index - 1] ? parent[index - 1].surface_form : "";
+		tokenized.forEach((token, index, parent) => {
+			const nowToken = token;
+			const prevWord = parent[index - 1] ? parent[index - 1].surface_form : "";
 
-			if (!nowWord) return;
+			if (!nowToken) return;
 
-			if (!wordSet[prevForm]) wordSet[prevForm] = [];
-			wordSet[prevForm].push(nowWord);
+			if (!wordSet[prevWord]) wordSet[prevWord] = [];
+			wordSet[prevWord].push(nowToken);
 		});
 	}
 
@@ -105,7 +108,10 @@ class Generator {
 }
 
 /**
+ * 学習データの格納オブジェクト
+ * 
  * @class Dictionary @extends Array
+ * @author Genbu Hase
  */
 class Dictionary extends Array {
 	constructor () {

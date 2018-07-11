@@ -3,7 +3,16 @@ const negaposiAnalyze = require("negaposi-analyzer-ja");
 
 
 
-/** @class TokenizerPlus */
+/**
+ * @typedef {"initialized"} TokenizerEvent
+ */
+
+/**
+ * Tokenizerを拡張したクラス
+ * 
+ * @class TokenizerPlus
+ * @author Genbu Hase
+ */
 class TokenizerPlus {
 	/**
 	 * TokenizerPlusを生成します
@@ -24,7 +33,7 @@ class TokenizerPlus {
 	/**
 	 * イベントを登録します
 	 * 
-	 * @param {"initialized"} eventType
+	 * @param {TokenizerEvent} eventType
 	 * @return {Promise<TokenizerPlus>}
 	 */
 	on (eventType) {

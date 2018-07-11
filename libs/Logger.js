@@ -8,7 +8,12 @@ const iconv = require("iconv-lite");
  * @typedef {"initialized"} AsyncLoggerEvent
  */
 
-/** @class Logger */
+/**
+ * ログ処理を行うクラス
+ * 
+ * @class Logger
+ * @author Genbu Hase
+ */
 class Logger {
 	/**
 	 * エンコード変換を行います
@@ -76,7 +81,12 @@ class Logger {
 	}
 }
 
-/** @class AsyncLogger @extends Logger */
+/**
+ * 非同期でログ処理を行うクラス
+ * 
+ * @class AsyncLogger @extends Logger
+ * @author Genbu Hase
+ */
 class AsyncLogger extends Logger {
 	/**
 	 * @param {String} logPath
@@ -114,7 +124,12 @@ class AsyncLogger extends Logger {
 
 
 
-/** @class ArrayLogger @extends Logger */
+/**
+ * 配列を取り扱うロガー
+ * 
+ * @class ArrayLogger @extends Logger
+ * @author Genbu Hase
+ */
 class ArrayLogger extends Logger {
 	/**
 	 * ArrayLoggerを生成します
@@ -141,7 +156,12 @@ class ArrayLogger extends Logger {
 	}
 }
 
-/** @class AsyncArrayLogger @extends AsyncLogger */
+/**
+ * 配列を取り扱う非同期ロガー
+ * 
+ * @class AsyncArrayLogger @extends AsyncLogger
+ * @author Genbu Hase
+ */
 class AsyncArrayLogger extends AsyncLogger {
 	/**
 	 * AsyncArrayLoggerを生成します
@@ -192,7 +212,12 @@ class AsyncArrayLogger extends AsyncLogger {
 	put (obj) { this.log.push(obj); }
 }
 
-/** @class CsvLogger @extends AsyncLogger */
+/**
+ * Csvを取り扱う非同期ロガー
+ * 
+ * @class CsvLogger @extends AsyncLogger
+ * @author Genbu Hase
+ */
 class CsvLogger extends AsyncLogger {
 	/**
 	 * CSV形式文字列からArrayに変換します

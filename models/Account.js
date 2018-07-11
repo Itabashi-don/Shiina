@@ -51,4 +51,6 @@ class Account extends Object {
 	}
 }
 
+
+
 module.exports = Account;

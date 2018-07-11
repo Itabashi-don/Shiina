@@ -21,4 +21,6 @@ class Notification extends Object {
 	}
 }
 
+
+
 module.exports = Notification;

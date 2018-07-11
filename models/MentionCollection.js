@@ -24,4 +24,6 @@ class MentionCollection extends Array {
 	}
 }
 
+
+
 module.exports = MentionCollection;
