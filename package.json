@@ -24,7 +24,8 @@
 	"main": "index.js",
 	"scripts": {
 		"start": "node index.js",
-		"debug": "node inspect index.js"
+		"debug": "node inspect index.js",
+		"postinstall": "gulp build-dict"
 	},
 	"devDependencies": {
 		"dotenv": "^5.0.1"

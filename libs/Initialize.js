@@ -43,7 +43,7 @@ class EnvironmentError extends TypeError {
 
 class DirStructure {
 	static get DIRS () { return ["logs"]; }
-	static get FILES () { return []; }
+	static get FILES () { return [".env"]; }
 	static get JSONS () {
 		return {
 			Object: [],
@@ -75,5 +75,5 @@ class DirStructure {
 
 module.exports = { Environment, DirStructure };
 
-Environment.init();
 DirStructure.init();
+Environment.init();
