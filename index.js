@@ -63,9 +63,23 @@ let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/publ
 				const notify = new Notification(stream.data);
 
 				if (notify.type === "mention") {
-					const { account, id, sensitive, spoiler_text, visibility } = notify.status;
+					const { account, id, sensitive, spoiler_text, visibility, plainContent } = notify.status;
 
-					mstdn.post("statuses", {
+					if (ENV.SHIINA_MODE === "debug") {
+						return mstdn.post("statuses", {
+							status: [
+								`@${account.acct}`,
+								eval(plainContent.split(/\r?\n/).slice(1).join("\r\n"))
+							].join("\r\n"),
+
+							sensitive,
+							spoiler_text,
+							in_reply_to_id: id,
+							visibility
+						});
+					}
+
+					/*return mstdn.post("statuses", {
 						status: [
 							`@${account.acct}`,
 							"お呼びですかーっ！？？✌︎('ω'✌︎ )"
@@ -75,9 +89,19 @@ let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/publ
 						spoiler_text,
 						in_reply_to_id: id,
 						visibility
-					});
+					});*/
 
-					return;
+					return mstdn.post("statuses", {
+						status: [
+							`@${account.acct}`,
+							generator.generate("")
+						].join("\r\n"),
+
+						sensitive,
+						spoiler_text,
+						in_reply_to_id: id,
+						visibility
+					});
 				}
 			}
 		}
