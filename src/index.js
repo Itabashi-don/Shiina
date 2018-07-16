@@ -27,11 +27,11 @@ const Notification = require("./models/Notification");
 /** @type {Initialize.ShiinaEnv} */
 const ENV = process.env;
 
-const dialogue = new Logger.ArrayLogger(`${__dirname}/${ENV.SHIINA_LOGPATH}`);
+const dialogue = new Logger.ArrayLogger(`${ENV.SHIINA_HOMEDIR}/${ENV.SHIINA_LOGPATH}`);
 const generator = new Generator(dialogue.log);
 
 /** @type {TokenizerPlus} */
-const tokenizer = new TokenizerPlus({ dicPath: `${__dirname}/dict` });
+const tokenizer = new TokenizerPlus({ dicPath: `${ENV.SHIINA_HOMEDIR}/dict` });
 tokenizer.on("initialized").then(() => console.info("Tokenizer has been ready."));
 
 /** @type {Mastodon} */
@@ -111,7 +111,7 @@ let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/publ
 
 let app = express();
 	app.use(bodyParser.json());
-	app.use("/", express.static(`${__dirname}/views`));
+	app.use("/", express.static(`${ENV.SHIINA_HOMEDIR}/src/views`));
 
 	app.post("/register", (req, res) => {
 		const { text } = req.body;

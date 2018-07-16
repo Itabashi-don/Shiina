@@ -112,6 +112,7 @@ class Generator {
  * @author Genbu Hase
  */
 class Dictionary extends Array {
+	/** Dictionaryを生成します */
 	constructor () {
 		super();
 	}
@@ -141,6 +142,18 @@ class Dictionary extends Array {
 	orderByStructure (type) {
 		return this.filter(word => word.pos === type);
 	}
+}
+
+/**
+ * 単語構造を格納するオブジェクト
+ * @author Genbu Hase
+ */
+class Structure {
+	/**
+	 * Structureを生成します
+	 * @param {Kuromoji.IpadicFeatures} word
+	 */
+	constructor (word = {}) {}
 }
 
 

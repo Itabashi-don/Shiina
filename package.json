@@ -21,10 +21,10 @@
 		"url": "https://genbuhase.github.io/"
 	},
 	"license": "MIT",
-	"main": "index.js",
+	"main": "src/index.js",
 	"scripts": {
-		"start": "node index.js",
-		"debug": "node inspect index.js",
+		"start": "node src/index.js",
+		"debug": "node inspect src/index.js",
 		"postinstall": "gulp build-dict"
 	},
 	"devDependencies": {

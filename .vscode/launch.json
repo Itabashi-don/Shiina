@@ -8,7 +8,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "しいちゃん、おはよっ！！",
-			"program": "${workspaceFolder}/index.js",
+			"program": "${workspaceFolder}/src/index.js",
 
 			"env": {
 				"SHIINA_ENV": "development",
@@ -20,7 +20,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "しいちゃん、デバッグ手伝って！",
-			"program": "${workspaceFolder}/index.js",
+			"program": "${workspaceFolder}/src/index.js",
 
 			"env": {
 				"SHIINA_ENV": "development",
@@ -33,7 +33,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "しいちゃん、お勉強しよ！！",
-			"program": "${workspaceFolder}/index.js",
+			"program": "${workspaceFolder}/src/index.js",
 
 			"env": {
 				"SHIINA_ENV": "development",
@@ -45,11 +45,12 @@
 			"type": "node",
 			"request": "launch",
 			"name": "LearningTest",
-			"program": "${workspaceFolder}/tests/LearningTest.js",
+			"program": "${workspaceFolder}/src/tests/LearningTest.js",
 
 			"env": {
 				"SHIINA_ENV": "development",
-				"SHIINA_MODE": ""
+				"SHIINA_MODE": "",
+				"SHIINA_LOGPATH": "logs/Genboo.log"
 			}
 		},
 
@@ -57,7 +58,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "GeneratingTest",
-			"program": "${workspaceFolder}/tests/GeneratingTest.js",
+			"program": "${workspaceFolder}/src/tests/GeneratingTest.js",
 
 			"env": {
 				"SHIINA_ENV": "development",
