@@ -5,7 +5,7 @@ const del = require("del");
 const sequence = require("run-sequence");
 const IPADic = require("mecab-ipadic-seed");
 const kuromoji = require("kuromoji");
-const Logger = require("./libs/Logger");
+const Logger = require("./src/libs/Logger");
 
 
 
