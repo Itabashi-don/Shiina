@@ -81,19 +81,19 @@ class Generator {
 	 * 文章を合成します
 	 * 
 	 * @param {String} [word=""]
-	 * @param {Boolean} [isAdvanced=false]
+	 * @param {String[]} [structures=[]]
 	 * 
 	 * @return {String}
 	 */
-	generate (word = "", isAdvanced = false) {
+	generate (word = "", structures = []) {
 		const { structureSet } = this;
+		if (!structures.length) structures = structureSet[Math.floor(Math.random() * structureSet.length)];
 		
 		const content = [ word ];
-		const structures = structureSet[Math.floor(Math.random() * structureSet.length)];
-
+		
 		let next = word;
 		let counter = 0;
-		while ((next = this.next(next, isAdvanced ? structures[counter] : null))) {
+		while (counter < structures.length && (next = this.next(next, structures[counter]))) {
 			next = next.surface_form;
 			counter++;
 
