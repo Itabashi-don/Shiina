@@ -153,7 +153,7 @@ class Structure {
 	 * Structureを生成します
 	 * @param {Kuromoji.IpadicFeatures} word
 	 */
-	constructor (word = {}) {}
+	constructor (word) {}
 }
 
 

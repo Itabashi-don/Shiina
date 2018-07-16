@@ -25,7 +25,7 @@ class Environment {
 		self.SHIINA_LOGPATH = self.SHIINA_LOGPATH || "logs/dialogue.log";
 		self.SHIINA_PORT = self.SHIINA_PORT || 8001;
 		
-		if (self.SHIINA_ENV == "development") require("dotenv").config();
+		if (self.SHIINA_ENV === "development") require("dotenv").config();
 
 		if (!self.SHIINA_INSTANCE) throw new EnvironmentError("INSTANCE");
 		if (!self.SHIINA_TOKEN) throw new EnvironmentError("TOKEN");
@@ -55,20 +55,19 @@ class DirStructure {
 
 	//Initialization of directory
 	static init () {
-		/** @type {ShiinaEnv} */
-		const ENV = process.env;
+		const HOMEDIR = process.cwd();
 		const { DIRS, FILES, JSONS } = DirStructure;
 
-		for (let dir of DIRS) if (!fs.existsSync(`${ENV.SHIINA_HOMEDIR}/${dir}`)) fs.mkdirSync(`${ENV.SHIINA_HOMEDIR}/${dir}`);
-		for (let file of FILES) if (!fs.existsSync(`${ENV.SHIINA_HOMEDIR}/${file}`)) fs.appendFileSync(`${ENV.SHIINA_HOMEDIR}/${file}`, "");
+		for (let dir of DIRS) if (!fs.existsSync(`${HOMEDIR}/${dir}`)) fs.mkdirSync(`${HOMEDIR}/${dir}`);
+		for (let file of FILES) if (!fs.existsSync(`${HOMEDIR}/${file}`)) fs.appendFileSync(`${HOMEDIR}/${file}`, "");
 
 		for (let type in JSONS) {
 			for (let json of JSONS[type]) {
-				if (fs.existsSync(`${ENV.SHIINA_HOMEDIR}/${json}`)) return;
+				if (fs.existsSync(`${HOMEDIR}/${json}`)) return;
 
 				switch (type) {
-					case "Object": return fs.appendFileSync(`${ENV.SHIINA_HOMEDIR}/${json}`, "{}");
-					case "Array": return fs.appendFileSync(`${ENV.SHIINA_HOMEDIR}/${json}`, "[]");
+					case "Object": return fs.appendFileSync(`${HOMEDIR}/${json}`, "{}");
+					case "Array": return fs.appendFileSync(`${HOMEDIR}/${json}`, "[]");
 				}
 			}
 		}
@@ -79,5 +78,5 @@ class DirStructure {
 
 module.exports = { Environment, DirStructure };
 
-Environment.init();
 DirStructure.init();
+Environment.init();

@@ -3,6 +3,8 @@
 	"version": "0.0.1",
 	"description": "An intelligent girl living in Itabashi",
 	"keywords": [
+		"node-js",
+		"linguistic-analysis",
 		"artificial-intelligence",
 		"ai",
 		"mastodon",
