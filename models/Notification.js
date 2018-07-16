@@ -6,7 +6,7 @@ const Status = require("./Status");
 
 /**
  * See https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md#notification
- * @class Notification @extends Object
+ * @extends Object
  */
 class Notification extends Object {
 	/**
@@ -14,10 +14,10 @@ class Notification extends Object {
 	 * @param {Types.Notifirable} data
 	 */
 	constructor (data) {
+		data.account = new Account(data.account);
+		if (data.status) data.status = new Status(data.status);
+		
 		Object.assign(super(), data);
-
-		this.account = new Account(this.account);
-		if (this.status) this.status = new Status(this.status);
 	}
 }
 

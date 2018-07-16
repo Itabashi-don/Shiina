@@ -2,7 +2,7 @@ const Types = require("./Types");
 
 
 
-/** @class MentionCollection @extends Array<Types.Mention> */
+/** @extends Array<Types.Mention> */
 class MentionCollection extends Array {
 	/**
 	 * MentionCollectionモデルを生成

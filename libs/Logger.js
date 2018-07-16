@@ -10,8 +10,6 @@ const iconv = require("iconv-lite");
 
 /**
  * ログ処理を行うクラス
- * 
- * @class Logger
  * @author Genbu Hase
  */
 class Logger {
@@ -84,7 +82,7 @@ class Logger {
 /**
  * 非同期でログ処理を行うクラス
  * 
- * @class AsyncLogger @extends Logger
+ * @extends Logger
  * @author Genbu Hase
  */
 class AsyncLogger extends Logger {
@@ -127,7 +125,7 @@ class AsyncLogger extends Logger {
 /**
  * 配列を取り扱うロガー
  * 
- * @class ArrayLogger @extends Logger
+ * @extends Logger
  * @author Genbu Hase
  */
 class ArrayLogger extends Logger {
@@ -159,7 +157,7 @@ class ArrayLogger extends Logger {
 /**
  * 配列を取り扱う非同期ロガー
  * 
- * @class AsyncArrayLogger @extends AsyncLogger
+ * @extends AsyncLogger
  * @author Genbu Hase
  */
 class AsyncArrayLogger extends AsyncLogger {
@@ -215,7 +213,7 @@ class AsyncArrayLogger extends AsyncLogger {
 /**
  * Csvを取り扱う非同期ロガー
  * 
- * @class CsvLogger @extends AsyncLogger
+ * @extends AsyncLogger
  * @author Genbu Hase
  */
 class CsvLogger extends AsyncLogger {

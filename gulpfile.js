@@ -1,5 +1,3 @@
-"use strict";
-
 const fs = require("fs");
 const gulp = require("gulp");
 const gulpGzip = require("gulp-gzip");
@@ -11,15 +9,13 @@ const Logger = require("./libs/Logger");
 
 
 
-gulp.task("clean-dict", done => {
-	return del([ "dict/*.gz" ], done);
-});
+gulp.task("clean-dict", done => del([ "dict/*.gz" ], done));
 
 gulp.task("create-dat-files", done => {
 	if (!fs.existsSync("dict/")) fs.mkdirSync("dict/");
 
 	/**
-	 * To node.js Buffer
+	 * Convert to buffer
 	 * @param {Buffer} typed
 	 */
 	const toBuffer = typed => {
@@ -116,9 +112,7 @@ gulp.task("compress-dict", () => {
 		.pipe(gulp.dest("dict/"));
 });
 
-gulp.task("clean-dat-files", done => {
-	return del([ "dict/*.dat" ], done);
-});
+gulp.task("clean-dat-files", done => del([ "dict/*.dat" ], done));
 
 gulp.task("build-dict", [ "clean-dict" ], () => {
 	sequence("create-dat-files", "compress-dict", "clean-dat-files");

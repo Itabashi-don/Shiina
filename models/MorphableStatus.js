@@ -3,7 +3,7 @@ const Status = require("./Status");
 
 
 
-/** @class MorphableStatus @extends Status */
+/** @extends Status */
 class MorphableStatus extends Status {
 	/**
 	 * MorphableStatusモデルを生成

@@ -7,7 +7,7 @@ const Account = require("./Account");
 
 /**
  * See https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md#status
- * @class Status @extends Object
+ * @extends Object
  */
 class Status extends Object {
 	/**
@@ -15,10 +15,10 @@ class Status extends Object {
 	 * @param {Types.Statusable} data
 	 */
 	constructor (data) {
-		Object.assign(super(), data);
-		
-		this.account = new Account(this.account);
-		if (this.reblog) this.reblog = new Status(this.reblog);
+		data.account = new Account(data.account);
+		if (data.reblog) data.reblog = new Status(data.reblog);
+
+		return Object.assign(super(), data);
 	}
 
 	/**

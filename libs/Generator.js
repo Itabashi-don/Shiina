@@ -4,8 +4,6 @@ const Kuromoji = require("kuromoji");
 
 /**
  * 学習データを基にして文章合成を行うクラス
- * 
- * @class Generator
  * @author Genbu Hase
  */
 class Generator {
@@ -110,7 +108,7 @@ class Generator {
 /**
  * 学習データの格納オブジェクト
  * 
- * @class Dictionary @extends Array
+ * @extends Array
  * @author Genbu Hase
  */
 class Dictionary extends Array {

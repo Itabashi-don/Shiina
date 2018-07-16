@@ -7,7 +7,7 @@ const Types = require("./Types");
 
 /**
  * See https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md#account
- * @class Account @extends Object
+ * @extends Object
  */
 class Account extends Object {
 	/**

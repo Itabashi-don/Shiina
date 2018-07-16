@@ -9,8 +9,6 @@ const negaposiAnalyze = require("negaposi-analyzer-ja");
 
 /**
  * Tokenizerを拡張したクラス
- * 
- * @class TokenizerPlus
  * @author Genbu Hase
  */
 class TokenizerPlus {
