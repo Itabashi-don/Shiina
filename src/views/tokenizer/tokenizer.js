@@ -47,7 +47,6 @@ window.addEventListener("DOMContentLoaded", () => {
 				console.log(tokenized);
 
 				while (resultList.rows.length) resultList.deleteRow(0);
-
 				for (const token of tokenized) {
 					const tokenRow = resultList.insertRow();
 
@@ -60,8 +59,38 @@ window.addEventListener("DOMContentLoaded", () => {
 
 				for (let i = 0; i < featureTypes.length; i++) feelingSumRow.insertCell(i);
 				feelingSumRow.cells[featureTypes.findIndex(name => name === "feeling")].textContent = feelingSum;
+
+				return Promise.resolve(tokenized);
 			}
-		);
+		).then(tokenized => {
+			const words = tokenized.map(token => token.surface_form);
+			const structures = tokenized.map(token => [ token.pos, token.pos_detail_1, token.pos_detail_2, token.pos_detail_3 ]);
+
+			let sequenceCount = 0;
+			structures.forEach((structure, index) => {
+				switch (true) {
+					case structure[0] === "名詞":
+					case structure[0] === "記号" && structure[1] === "空白" && structures[index - 1] && structures[index - 1][1] !== "固有名詞":
+						switch (true) {
+							case 0 < sequenceCount && structure[1] === "接尾" && structures[index + 1] && structures[index + 1][1] !== "接尾":
+							case 0 < sequenceCount && index === structures.length - 1:
+								M.toast({ classes: "orange darken-2", html: `【新出固有名詞】${words.slice(index - sequenceCount, index + 1).join("")}` });
+								return sequenceCount = 0;
+						}
+
+						return sequenceCount++;
+
+					default:
+						switch (true) {
+							case 1 < sequenceCount:
+								M.toast({ classes: "blue", html: `【新出固有名詞】${words.slice(index - sequenceCount, index).join("")}` });
+								break;
+						}
+
+						return sequenceCount = 0;
+				}
+			});
+		})
 	});
 
 	clearBtn.addEventListener("click", () => {

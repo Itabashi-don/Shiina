@@ -144,11 +144,11 @@ let app = express();
 	});
 
 	app.post("/generate", (req, res) => {
-		const { text, isAdvanced } = req.body;
+		const { text, structure } = req.body;
 
 		res.end(JSON.stringify({
 			state: "success",
-			text: generator.generate(text, isAdvanced)
+			text: generator.generate(text, structure)
 		}));
 	});
 

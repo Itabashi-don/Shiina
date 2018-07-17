@@ -149,11 +149,39 @@ class Dictionary extends Array {
  * @author Genbu Hase
  */
 class Structure {
+	static get DELIMITOR () { return "/" }
+
+	/**
+	 * 指定されたStructureからマッチ条件を生成します
+	 * @param {Structure} structure
+	 */
+	static createCondition (structure) {
+		const structures = structure.structure.split(Structure.DELIMITOR);
+		const [ pos = "*", pos_detail_1 = "*", pos_detail_2 = "*", pos_detail_3 = "*" ] = structures;
+
+		return { pos, pos_detail_1, pos_detail_2, pos_detail_3 };
+	}
+
+
+
 	/**
 	 * Structureを生成します
 	 * @param {Kuromoji.IpadicFeatures} word
 	 */
-	constructor (word) {}
+	constructor (word) {
+		this.word = word;
+	}
+
+	get structure () {
+		const { pos, pos_detail_1, pos_detail_2, pos_detail_3 } = this.word;
+
+		let structure = pos;
+		for (const detail of [ pos_detail_1, pos_detail_2, pos_detail_3 ]) {
+			if (detail && detail !== "*") structure += Structure.DELIMITOR + detail;
+		}
+
+		return structure;
+	}
 }
 
 
