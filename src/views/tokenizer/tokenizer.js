@@ -74,7 +74,11 @@ window.addEventListener("DOMContentLoaded", () => {
 						switch (true) {
 							case 0 < sequenceCount && structure[1] === "接尾" && structures[index + 1] && structures[index + 1][1] !== "接尾":
 							case 0 < sequenceCount && index === structures.length - 1:
-								M.toast({ classes: "orange darken-2", html: `【新出固有名詞】${words.slice(index - sequenceCount, index + 1).join("")}` });
+								M.toast({
+									classes: "orange darken-2",
+									html: `【新出固有名詞】${words.slice(index - sequenceCount, index + 1).join("")}`
+								});
+
 								return sequenceCount = 0;
 						}
 
@@ -83,7 +87,11 @@ window.addEventListener("DOMContentLoaded", () => {
 					default:
 						switch (true) {
 							case 1 < sequenceCount:
-								M.toast({ classes: "blue", html: `【新出固有名詞】${words.slice(index - sequenceCount, index).join("")}` });
+								M.toast({
+									classes: "blue",
+									html: `【新出固有名詞】${words.slice(index - sequenceCount, index).join("")}`
+								});
+								
 								break;
 						}
 
