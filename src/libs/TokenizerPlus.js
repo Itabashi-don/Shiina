@@ -80,6 +80,7 @@ class TokenizerPlus {
 	detectPropers (textOrTokenized) {
 		if (typeof textOrTokenized === "string") textOrTokenized = this.tokenize(textOrTokenized);
 
+		const existingFlags = textOrTokenized.map(token => token.word_type === "KNOWN");
 		const words = textOrTokenized.map(token => token.surface_form);
 		const structures = textOrTokenized.map(token => [ token.pos, token.pos_detail_1, token.pos_detail_2, token.pos_detail_3 ]);
 
@@ -92,21 +93,26 @@ class TokenizerPlus {
 
 			switch (true) {
 				case structure[0] === "名詞":
-				case structure[0] === "記号" && structure[1] === "空白" && prev && prev[1] !== "固有名詞":
+				case structure[0] === "記号" && structure[1] === "空白" && prev && prev[0] === "名詞":
 					switch (true) {
 						case 0 < sequenceCount && structure[1] === "接尾" && next && next[1] !== "接尾":
 						case 0 < sequenceCount && index === structures.length - 1:
-							propers.push({ type: 1, word: words.slice(index - sequenceCount, index + 1).join("") });
+							propers.push({
+								type: 1,
+								word: words.slice(index - sequenceCount, index + 1).join("")
+							});
+
 							return sequenceCount = 0;
 					}
 
 					return sequenceCount++;
 
 				default:
-					switch (true) {
-						case 1 < sequenceCount:
-							propers.push({ type: 2, word: words.slice(index - sequenceCount, index).join("") });
-							break;
+					if ((sequenceCount === 1 && !existingFlags[index - 1]) || 1 < sequenceCount) {
+						propers.push({
+							type: 2,
+							word: words.slice(index - sequenceCount, index).join("")
+						});
 					}
 
 					return sequenceCount = 0;
