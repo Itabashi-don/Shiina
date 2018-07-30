@@ -123,12 +123,9 @@ class Generator {
  * @author Genbu Hase
  */
 class Dictionary extends Array {
-	/**
-	 * Dictionaryを生成します
-	 * @param {Kuromoji.IpadicFeatures[]} logData 取り込むログデータ
-	 */
-	constructor (logData) {
-		super(...logData);
+	/** Dictionaryを生成します */
+	constructor () {
+		super();
 	}
 
 	/**
