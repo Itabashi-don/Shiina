@@ -9,14 +9,25 @@ const Kuromoji = require("kuromoji");
 class Generator {
 	/**
 	 * Generatorを生成します
-	 * @param {Kuromoji.IpadicFeatures[][]} logData
+	 * @param {Kuromoji.IpadicFeatures[][]} logData 取り込むログデータ
 	 */
 	constructor (logData) {
-		/** @type {Dictionary} */
+		/**
+		 * ログデータから抽出された単語辞書
+		 * @type {Dictionary}
+		 */
 		this.dictionary = new Dictionary();
-		/** @type {Object<string, Kuromoji.IpadicFeatures[]>} */
+
+		/**
+		 * 単語間連結リスト
+		 * @type {Object<string, Kuromoji.IpadicFeatures[]>}
+		 */
 		this.wordSet = {};
-		/** @type {String[][]} */
+
+		/**
+		 * 文法構造体セット
+		 * @type {String[][]}
+		 */
 		this.structureSet = [];
 
 		if (logData) this.importLog(logData);
@@ -24,7 +35,7 @@ class Generator {
 
 	/**
 	 * データの登録を行います
-	 * @param {Kuromoji.IpadicFeatures[]} tokenized
+	 * @param {Kuromoji.IpadicFeatures[]} tokenized 文章の分析結果
 	 */
 	register (tokenized) {
 		const { dictionary, wordSet, structureSet } = this;
@@ -45,19 +56,19 @@ class Generator {
 
 	/**
 	 * ログを取り込みます
-	 * @param {Kuromoji.IpadicFeatures[][]} logData
+	 * @param {Kuromoji.IpadicFeatures[][]} logData 取り込むログデータ
 	 */
 	importLog (logData) {
 		for (const sentence of logData) this.register(sentence);
 	}
 
 	/**
-	 * 次に続く文字を返します
+	 * 次に結合する文字を返します
 	 * 
-	 * @param {String} [word=""]
-	 * @param {String | null} [structure=null]
+	 * @param {String} [word=""] 結合させる単語
+	 * @param {String | null} [structure=null] 結合する単語の品詞
 	 * 
-	 * @return {Kuromoji.IpadicFeatures}
+	 * @return {Kuromoji.IpadicFeatures} 結合する単語
 	 */
 	next (word = "", structure = null) {
 		const { dictionary, wordSet } = this;
@@ -80,10 +91,10 @@ class Generator {
 	/**
 	 * 文章を合成します
 	 * 
-	 * @param {String} [word=""]
-	 * @param {String[]} [structures=[]]
+	 * @param {String} [word=""] 開始する単語
+	 * @param {String[]} [structures=[]] 文章の文法構造
 	 * 
-	 * @return {String}
+	 * @return {String} 合成された文章
 	 */
 	generate (word = "", structures = []) {
 		const { structureSet } = this;
@@ -108,20 +119,23 @@ class Generator {
 /**
  * 学習データの格納オブジェクト
  * 
- * @extends Array
+ * @extends Array<Kuromoji.IpadicFeatures>
  * @author Genbu Hase
  */
 class Dictionary extends Array {
-	/** Dictionaryを生成します */
-	constructor () {
-		super();
+	/**
+	 * Dictionaryを生成します
+	 * @param {Kuromoji.IpadicFeatures[]} logData 取り込むログデータ
+	 */
+	constructor (logData) {
+		super(...logData);
 	}
 
 	/**
-	 * 指定された条件に合う単語を返します
+	 * 指定された条件を満たした単語で構成された辞書を返します
 	 * 
-	 * @param {Object} conditions
-	 * @return {Dictionary}
+	 * @param {Object} conditions 単語の条件
+	 * @return {Dictionary} 条件を満たした単語で構成された辞書
 	 */
 	orderBy (conditions = {}) {
 		return this.filter(word => {
@@ -134,10 +148,10 @@ class Dictionary extends Array {
 	}
 
 	/**
-	 * 指定された品詞の単語を返します
+	 * 指定された品詞の単語で構成された辞書を返します
 	 * 
-	 * @param {String} type
-	 * @return {Dictionary}
+	 * @param {String} type 品詞
+	 * @return {Dictionary} 特定の品詞の単語で構成された辞書
 	 */
 	orderByStructure (type) {
 		return this.filter(word => word.pos === type);

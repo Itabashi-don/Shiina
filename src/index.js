@@ -14,7 +14,7 @@ const Notification = require("./models/Notification");
 
 
 
-/**
+/*
  * 名詞2つ以上連続
  * (名詞/接尾があればそこで区切る)
  * 

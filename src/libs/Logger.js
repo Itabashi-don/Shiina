@@ -2,11 +2,9 @@ const fs = require("fs");
 const csv = require("csv");
 const iconv = require("iconv-lite");
 
+const { ArgumentNotAcceptableError } = require("./Errors");
 
 
-/**
- * @typedef {"initialized"} AsyncLoggerEvent
- */
 
 /**
  * ログ処理を行うクラス
@@ -16,12 +14,12 @@ class Logger {
 	/**
 	 * エンコード変換を行います
 	 * 
-	 * @param {String} content
-	 * @param {Object} options
-	 * @param {String} [options.before="UTF-8"]
-	 * @param {String} [options.after="UTF-8"]
+	 * @param {String} content 変換する文章
+	 * @param {Object} options 変換オプション
+	 * @param {String} [options.before="UTF-8"] 変換前のエンコード
+	 * @param {String} [options.after="UTF-8"] 変換後のエンコード
 	 * 
-	 * @return {String}
+	 * @return {String} 変換された文章
 	 */
 	static encode (content, options = { before: "UTF-8", after: "UTF-8" }) {
 		return iconv.decode(iconv.encode(content, options.before || "UTF-8"), options.after || "UTF-8");
@@ -30,11 +28,11 @@ class Logger {
 
 
 	/**
-	 * @param {String} logPath
-	 * @param {String} [encoding="UTF-8"]
+	 * @param {String} logPath ログファイルのパス
+	 * @param {String} [encoding="UTF-8"] ログファイルのエンコード
 	 */
 	constructor (logPath, encoding = "UTF-8") {
-		if (!logPath) throw new TypeError("'logPath'(1st argument) must be String.");
+		if (typeof logPath !== "string") throw new ArgumentNotAcceptableError("logPath", 1, "String");
 		
 		this.path = logPath;
 		this.encoding = encoding;
@@ -58,7 +56,10 @@ class Logger {
 	get length () { return this.log && this.log.length }
 
 	/** ログを読み込みます */
-	load () { this.log = null }
+	load () {
+		/** 保存されたログ */
+		this.log = null;
+	}
 
 	/** ログを保存します */
 	store () {}
@@ -87,8 +88,8 @@ class Logger {
  */
 class AsyncLogger extends Logger {
 	/**
-	 * @param {String} logPath
-	 * @param {String} [encoding="UTF-8"]
+	 * @param {String} logPath ログファイルのパス
+	 * @param {String} [encoding="UTF-8"] ログファイルのエンコード
 	 */
 	constructor (logPath, encoding = "UTF-8") {
 		super(logPath, encoding);
@@ -99,13 +100,15 @@ class AsyncLogger extends Logger {
 	/**
 	 * イベントを登録します
 	 * 
-	 * @param {AsyncLoggerEvent} eventType
-	 * @return {Promise<AsyncLogger>}
+	 * @param {AsyncLogger.EventType} eventType イベント名
+	 * @param {AsyncLogger.EventCallback} callback イベント発火時のコールバック
+	 * 
+	 * @return {Promise<AsyncLogger>} イベント発火時に呼ばれるPromise
 	 */
-	on (eventType) {
+	on (eventType, callback) {
 		switch (eventType) {
 			default:
-				throw new ReferenceError("'eventType'(1st argument) is not acceptable.");
+				throw new ArgumentNotAcceptableError("eventType", 1, "AsyncLogger.EventType.*");
 
 			case "initialized":
 				return new Promise(resolve => {
@@ -113,12 +116,26 @@ class AsyncLogger extends Logger {
 						if (!this.initialized) return;
 
 						clearInterval(detector);
+
+						if (callback) callback(this);
 						resolve(this);
 					}, 1);
 				});
 		}
 	}
 }
+
+/**
+ * AsyncLoggerのイベントタイプ
+ * @typedef {"initialized"} AsyncLogger.EventType
+ */
+
+/**
+ * AsyncLoggerのイベントコールバック
+ * 
+ * @callback AsyncLogger.EventCallback
+ * @param {AsyncLogger} logger 発火したイベントの要素
+ */
 
 
 
@@ -132,8 +149,8 @@ class ArrayLogger extends Logger {
 	/**
 	 * ArrayLoggerを生成します
 	 * 
-	 * @param {String} logPath
-	 * @param {String} [encoding="UTF-8"]
+	 * @param {String} logPath ログファイルのパス
+	 * @param {String} [encoding="UTF-8"] ログファイルのエンコード
 	 */
 	constructor (logPath, encoding = "UTF-8") {
 		super(logPath, encoding);
@@ -146,7 +163,7 @@ class ArrayLogger extends Logger {
 		this.log = JSON.parse(Logger.encode(fs.readFileSync(this.path), { before: this.encoding }));
 	}
 
-	store () { fs.writeFileSync(this.path, Logger.encode(JSON.stringify(this.log), { after: this.encoding })); }
+	store () { fs.writeFileSync(this.path, Logger.encode(JSON.stringify(this.log), { after: this.encoding })) }
 	
 	put (obj) {
 		this.log.push(obj);
@@ -164,8 +181,8 @@ class AsyncArrayLogger extends AsyncLogger {
 	/**
 	 * AsyncArrayLoggerを生成します
 	 * 
-	 * @param {String} logPath
-	 * @param {String} [encoding="UTF-8"]
+	 * @param {String} logPath ログファイルのパス
+	 * @param {String} [encoding="UTF-8"] ログファイルのエンコード
 	 */
 	constructor (logPath, encoding = "UTF-8") {
 		super(logPath, encoding);
@@ -174,10 +191,12 @@ class AsyncArrayLogger extends AsyncLogger {
 	get initialState () { return "[]" }
 
 	/**
-	 * @param {AsyncLoggerEvent} eventType
-	 * @return {Promise<AsyncArrayLogger>}
+	 * @param {AsyncLogger.EventType} eventType イベント名
+	 * @param {AsyncLogger.EventCallback} callback イベント発火時のコールバック
+	 * 
+	 * @return {Promise<AsyncArrayLogger>} イベント発火時に呼ばれるPromise
 	 */
-	on (eventType) { return super.on(eventType) }
+	on (eventType, callback) { return super.on(eventType, callback) }
 
 	/** @return {Promise<void>} */
 	load () {
@@ -207,7 +226,7 @@ class AsyncArrayLogger extends AsyncLogger {
 		});
 	}
 
-	put (obj) { this.log.push(obj); }
+	put (obj) { this.log.push(obj) }
 }
 
 /**
@@ -220,11 +239,11 @@ class CsvLogger extends AsyncLogger {
 	/**
 	 * CSV形式文字列からArrayに変換します
 	 * 
-	 * @param {String} csvString
-	 * @param {Object} [options]
-	 * @param {Boolean} [options.columns=true]
+	 * @param {String} csvString Csv形式文字列
+	 * @param {Object} [options] 変換オプション
+	 * @param {Boolean} [options.columns=true] 最初行をヘッダーにするかどうか
 	 * 
-	 * @return {Promise<Array<Object>>}
+	 * @return {Promise<Array<Object>>} 変換されたデータが格納されたPromise
 	 */
 	static csvToJson (csvString, options = { columns: true }) {
 		const parser = csv.parse(csvString, options);
@@ -245,12 +264,12 @@ class CsvLogger extends AsyncLogger {
 	/**
 	 * CSVファイルからArrayに変換します
 	 * 
-	 * @param {String} csvPath
-	 * @param {String} [encoding="UTF-8"]
-	 * @param {Object} [options]
-	 * @param {Boolean} [options.columns=true]
+	 * @param {String} csvPath Csvファイルのパス
+	 * @param {String} [encoding="UTF-8"] Csvファイルのエンコード
+	 * @param {Object} [options] 変換オプション
+	 * @param {Boolean} [options.columns=true] 最初行をヘッダーにするかどうか
 	 * 
-	 * @return {Promise<Array<Object>>}
+	 * @return {Promise<Array<Object>>} 変換されたデータが格納されたPromise
 	 */
 	static csvFileToJson (csvPath, encoding = "UTF-8", options = { columns: true }) {
 		const parser = csv.parse(options);
@@ -276,11 +295,11 @@ class CsvLogger extends AsyncLogger {
 	/**
 	 * ArrayからCSV形式文字列に変換します
 	 * 
-	 * @param {Array} jsonObj
-	 * @param {Object} [options]
-	 * @param {Boolean} [options.header=true]
+	 * @param {Array} jsonObj 配列オブジェクト
+	 * @param {Object} [options] 変換オプション
+	 * @param {Boolean} [options.header=true] 最初行にヘッダーを追加するかどうか
 	 * 
-	 * @return {Promise<String>}
+	 * @return {Promise<String>} 変換されたデータが格納されたPromise
 	 */
 	static jsonToCsv (jsonObj, options = { header: true }) {
 		const stringifier = csv.stringify(jsonObj, options);
@@ -303,10 +322,10 @@ class CsvLogger extends AsyncLogger {
 	/**
 	 * CsvLoggerを生成します
 	 * 
-	 * @param {String} logPath
-	 * @param {String} [encoding="UTF-8"]
-	 * @param {Object} [options]
-	 * @param {Boolean} [options.columns=true]
+	 * @param {String} logPath ログファイルのパス
+	 * @param {String} [encoding="UTF-8"] ログファイルのエンコード
+	 * @param {Object} [options] Csv変換オプション
+	 * @param {Boolean} [options.columns=true] 最初行をヘッダーにするかどうか
 	 */
 	constructor (logPath, encoding = "UTF-8", options = { columns: true }) {
 		super(logPath, encoding);
@@ -317,10 +336,12 @@ class CsvLogger extends AsyncLogger {
 	get initialState () { return "" }
 
 	/**
-	 * @param {AsyncLoggerEvent} eventType
-	 * @return {Promise<CsvLogger>}
+	 * @param {AsyncLogger.EventType} eventType イベント名
+	 * @param {AsyncLogger.EventCallback} callback イベント発火時のコールバック
+	 * 
+	 * @return {Promise<CsvLogger>} イベント発火時に呼ばれるPromise
 	 */
-	on (eventType) { return super.on(eventType) }
+	on (eventType, callback) { return super.on(eventType, callback) }
 
 	load () {
 		return CsvLogger.csvFileToJson(this.path, this.encoding, this.options).catch(error => { throw error }).then(parsed => {
@@ -341,7 +362,7 @@ class CsvLogger extends AsyncLogger {
 
 	/**
 	 * Csv形式に変換します
-	 * @return {Promise<String>}
+	 * @return {Promise<String>} Csv形式文字列
 	 */
 	toCsv () { return CsvLogger.jsonToCsv(this.log) }
 }

@@ -1,6 +1,8 @@
 const Kuromoji = require("kuromoji");
 const negaposiAnalyze = require("negaposi-analyzer-ja");
 
+const { ArgumentNotAcceptableError, ArgumentNotDefinedError } = require("./Errors");
+
 
 
 /**
@@ -13,8 +15,9 @@ class TokenizerPlus {
 	 * @param {Kuromoji.TokenizerBuilderOption} option Tokenizerのオプション
 	 */
 	constructor (option) {
-		this.self = null;
+		if (!option) throw new ArgumentNotDefinedError("option", 1);
 
+		this.self = null;
 		Kuromoji.builder(option).build((error, tokenizer) => {
 			if (error) throw error;
 
@@ -27,13 +30,16 @@ class TokenizerPlus {
 	/**
 	 * イベントを登録します
 	 * 
-	 * @param {TokenizerPlus.TokenizerPlusEventType} eventType イベント名
-	 * @param {TokenizerPlus.TokenizerPlusEvent} callback イベント発火時のコールバック
+	 * @param {TokenizerPlus.EventType} eventType イベント名
+	 * @param {TokenizerPlus.EventCallback} [callback] イベント発火時のコールバック
 	 * 
-	 * @return {Promise<TokenizerPlus>} イベント発火時のコールバック
+	 * @return {Promise<TokenizerPlus>} イベント発火時に呼ばれるPromise
 	 */
 	on (eventType, callback) {
 		switch (eventType) {
+			default:
+				throw new ArgumentNotAcceptableError("eventType", 1, "TokenizerPlus.EventType.*");
+
 			case "initialized":
 				return new Promise(resolve => {
 					const detector = setInterval(() => {
@@ -55,6 +61,8 @@ class TokenizerPlus {
 	 * @return {Kuromoji.IpadicFeatures[]} 分析結果
 	 */
 	tokenize (text) {
+		if (typeof text !== "string") throw new ArgumentNotAcceptableError("text", 1, "String");
+
 		const { self } = this;
 		
 		const tokenized = self.tokenize(text);
@@ -123,13 +131,13 @@ class TokenizerPlus {
 
 /**
  * TokenizerPlusのイベントタイプ
- * @typedef {"initialized"} TokenizerPlus.TokenizerPlusEventType
+ * @typedef {"initialized"} TokenizerPlus.EventType
  */
 
 /**
  * TokenizerPlusのイベントコールバック
  * 
- * @callback TokenizerPlus.TokenizerPlusEvent
+ * @callback TokenizerPlus.EventCallback
  * @param {TokenizerPlus} tokenizer 発火したイベントの要素
  */
 

@@ -1,20 +1,10 @@
 const fs = require("fs");
+const { EnvironmentNotDefinedError } = require("./Errors");
 
 
-
-/**
- * @typedef {Object} ShiinaEnv
- * @prop {String} SHIINA_HOMEDIR Shiinaが動作しているホームディレクトリのパス
- * @prop {String} SHIINA_INSTANCE 動作させるアカウントがあるインスタンスのURL
- * @prop {String} SHIINA_TOKEN 動作させるアカウントのトークン
- * @prop {"production" | "development"} [SHIINA_ENV="production"] 動作環境
- * @prop {"" | "learning" | "debug"} [SHIINA_MODE=""] 動作モード
- * @prop {String} [SHIINA_LOGPATH="logs/dialogue.log"] 学習状況を保存するファイルのパス
- * @prop {Number} [SHIINA_PORT=8001] Shiinaを動かすポート
- */
 
 class Environment {
-	//Initialization of environment
+	/** 環境変数を初期化します */
 	static init () {
 		/** @type {ShiinaEnv} */
 		const self = process.env;
@@ -27,25 +17,27 @@ class Environment {
 		
 		if (self.SHIINA_ENV === "development") require("dotenv").config();
 
-		if (!self.SHIINA_INSTANCE) throw new EnvironmentError("INSTANCE");
-		if (!self.SHIINA_TOKEN) throw new EnvironmentError("TOKEN");
+		if (!self.SHIINA_INSTANCE) throw new EnvironmentNotDefinedError("SHIINA_INSTANCE");
+		if (!self.SHIINA_TOKEN) throw new EnvironmentNotDefinedError("SHIINA_TOKEN");
 	}
 }
 
-class EnvironmentError extends TypeError {
-	/** @param {String} envName */
-	constructor (envName) {
-		if (!envName) throw new TypeError("An argument, 'envName' is required.");
-
-		super(`An environment, 'SHIINA_${envName}' is required.`);
-	}
-}
+/**
+ * @typedef {Object} ShiinaEnv
+ * @prop {String} SHIINA_HOMEDIR Shiinaが動作しているホームディレクトリのパス
+ * @prop {String} SHIINA_INSTANCE 動作させるアカウントがあるインスタンスのURL
+ * @prop {String} SHIINA_TOKEN 動作させるアカウントのトークン
+ * @prop {"production" | "development"} [SHIINA_ENV="production"] 動作環境
+ * @prop {"" | "learning" | "debug"} [SHIINA_MODE=""] 動作モード
+ * @prop {String} [SHIINA_LOGPATH="logs/dialogue.log"] 学習状況を保存するファイルのパス
+ * @prop {Number} [SHIINA_PORT=8001] Shiinaを動かすポート
+ */
 
 
 
 class DirStructure {
-	static get DIRS () { return ["logs"]; }
-	static get FILES () { return [".env"]; }
+	static get DIRS () { return ["logs"] }
+	static get FILES () { return [".env"] }
 	static get JSONS () {
 		return {
 			Object: [],
@@ -53,7 +45,7 @@ class DirStructure {
 		};
 	}
 
-	//Initialization of directory
+	/** ファイル構成を初期化します */
 	static init () {
 		const HOMEDIR = process.cwd();
 		const { DIRS, FILES, JSONS } = DirStructure;
