@@ -4,17 +4,13 @@ const negaposiAnalyze = require("negaposi-analyzer-ja");
 
 
 /**
- * @typedef {"initialized"} TokenizerEvent
- */
-
-/**
  * Tokenizerを拡張したクラス
  * @author Genbu Hase
  */
 class TokenizerPlus {
 	/**
 	 * TokenizerPlusを生成します
-	 * @param {Kuromoji.TokenizerBuilderOption} option
+	 * @param {Kuromoji.TokenizerBuilderOption} option Tokenizerのオプション
 	 */
 	constructor (option) {
 		this.self = null;
@@ -26,15 +22,17 @@ class TokenizerPlus {
 		});
 	}
 
-	get initialized () { return this.self ? true : false; }
+	get initialized () { return this.self ? true : false }
 
 	/**
 	 * イベントを登録します
 	 * 
-	 * @param {TokenizerEvent} eventType
-	 * @return {Promise<TokenizerPlus>}
+	 * @param {TokenizerPlus.TokenizerPlusEventType} eventType イベント名
+	 * @param {TokenizerPlus.TokenizerPlusEvent} callback イベント発火時のコールバック
+	 * 
+	 * @return {Promise<TokenizerPlus>} イベント発火時のコールバック
 	 */
-	on (eventType) {
+	on (eventType, callback) {
 		switch (eventType) {
 			case "initialized":
 				return new Promise(resolve => {
@@ -42,6 +40,8 @@ class TokenizerPlus {
 						if (!this.initialized) return;
 
 						clearInterval(detector);
+
+						if (callback) callback(this);
 						resolve(this);
 					});
 				});
@@ -49,10 +49,10 @@ class TokenizerPlus {
 	}
 
 	/**
-	 * 文章を解析・分解し、単語ごとの感情の正負の値を含めた結果を返します
+	 * 文章を分析し、単語ごとの感情の正負の値を含めた結果を返します
 	 * 
-	 * @param {String} text
-	 * @return {Kuromoji.IpadicFeatures[]}
+	 * @param {String} text 分析する文章
+	 * @return {Kuromoji.IpadicFeatures[]} 分析結果
 	 */
 	tokenize (text) {
 		const { self } = this;
@@ -64,18 +64,74 @@ class TokenizerPlus {
 	}
 
 	/**
-	 * 文章全体のポジティブ・ネガティブ度を返します
-	 * @param {String} text
+	 * 文中に含まれている固有名詞を判別します
+	 * 
+	 * @param {String | Kuromoji.IpadicFeatures[]} textOrTokenized 分析する文章 | 文章の分析結果
+	 * @return {Array<String>} 判別された固有名詞
 	 */
-	getFeeling (text) {
-		const feelings = this.tokenize(text).map(word => word.feeling);
+	detectPropers (textOrTokenized) {
+		if (typeof textOrTokenized === "string") textOrTokenized = this.tokenize(textOrTokenized);
 
-		let score = 0;
-		for (let feeling of feelings) score += feeling;
+		const words = textOrTokenized.map(token => token.surface_form);
+		const structures = textOrTokenized.map(token => [ token.pos, token.pos_detail_1, token.pos_detail_2, token.pos_detail_3 ]);
 
-		return score;
+		const propers = [];
+
+		let sequenceCount = 0;
+		structures.forEach((structure, index) => {
+			const prev = structures[index - 1];
+			const next = structures[index + 1];
+
+			switch (true) {
+				case structure[0] === "名詞":
+				case structure[0] === "記号" && structure[1] === "空白" && prev && prev[1] !== "固有名詞":
+					switch (true) {
+						case 0 < sequenceCount && structure[1] === "接尾" && next && next[1] !== "接尾":
+						case 0 < sequenceCount && index === structures.length - 1:
+							propers.push({ type: 1, word: words.slice(index - sequenceCount, index + 1).join("") });
+							return sequenceCount = 0;
+					}
+
+					return sequenceCount++;
+
+				default:
+					switch (true) {
+						case 1 < sequenceCount:
+							propers.push({ type: 2, word: words.slice(index - sequenceCount, index).join("") });
+							break;
+					}
+
+					return sequenceCount = 0;
+			}
+		});
+
+		return propers;
+	}
+
+	/**
+	 * 文章全体のポジティブ・ネガティブ度数を返します
+	 * 
+	 * @param {String | Kuromoji.IpadicFeatures[]} textOrTokenized 分析する文章 | 文章の分析結果
+	 * @return {Number} ポジティブ・ネガティブ度数
+	 */
+	getFeeling (textOrTokenized) {
+		if (typeof textOrTokenized === "string") textOrTokenized = this.tokenize(textOrTokenized);
+
+		return textOrTokenized.map(word => word.feeling).reduce((prev, feeling) => prev + feeling);
 	}
 }
+
+/**
+ * TokenizerPlusのイベントタイプ
+ * @typedef {"initialized"} TokenizerPlus.TokenizerPlusEventType
+ */
+
+/**
+ * TokenizerPlusのイベントコールバック
+ * 
+ * @callback TokenizerPlus.TokenizerPlusEvent
+ * @param {TokenizerPlus} tokenizer 発火したイベントの要素
+ */
 
 
 

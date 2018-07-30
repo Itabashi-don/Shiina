@@ -165,9 +165,10 @@ let app = express();
 		const { text, mode } = req.body;
 
 		const tokenized = tokenizer.tokenize(text);
+		const propers = tokenizer.detectPropers(tokenized);
 
 		if (!mode || mode === "short") {
-			res.end(JSON.stringify(tokenized));
+			res.end(JSON.stringify({ tokenized, propers }));
 		} else if (mode === "long") {
 			const sentences = [];
 
