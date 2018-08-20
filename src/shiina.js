@@ -162,27 +162,22 @@ let app = express();
 	});
 
 	app.post("/tokenize", (req, res) => {
-		const { text, mode } = req.body;
+		const { text, isMultiLine } = req.body;
 
-		const tokenized = tokenizer.tokenize(text);
+		if (isMultiLine) {
+			const tokenizedCollection = tokenizer.tokenize(text, isMultiLine);
+			let propers = [];
+
+			for (const tokenized of tokenizedCollection) propers.push(...tokenizer.detectPropers(tokenized));
+			propers = propers.filter((proper, index) => propers.lastIndexOf(proper) === index);
+
+			return res.end(JSON.stringify({ tokenizedCollection, propers }));
+		}
+
+		const tokenized = tokenizer.tokenize(text, isMultiLine);
 		const propers = tokenizer.detectPropers(tokenized);
 
-		if (!mode || mode === "short") {
-			res.end(JSON.stringify({ tokenized, propers }));
-		} else if (mode === "long") {
-			const sentences = [];
-
-			let i1 = 0, i2 = tokenized.length;
-			while ((i2 = tokenized.slice(i1, i2).findIndex(word => word.basic_form === "。")) !== -1) {
-				sentences.push(tokenized.slice(i1, i1 + i2 + 1));
-
-				i1 += i2 + 1;
-				i2 = tokenized.length;
-			}
-			sentences.push(tokenized.slice(i1, tokenized.length));
-
-			res.end(JSON.stringify(sentences));
-		}
+		res.end(JSON.stringify({ tokenized, propers }));
 	});
 
 app.listen(ENV.SHIINA_PORT, () => {

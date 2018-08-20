@@ -6,7 +6,7 @@ const { ArgumentNotAcceptableError, ArgumentNotDefinedError } = require("./Shiin
 
 
 /**
- * Tokenizerを拡張したクラス
+ * 形態素解析機・改
  * @author Genbu Hase
  */
 class Tokenizer {
@@ -58,12 +58,29 @@ class Tokenizer {
 	 * 文章を分析し、単語ごとの感情の正負の値を含めた結果を返します
 	 * 
 	 * @param {String} text 分析する文章
-	 * @return {Kuromoji.IpadicFeatures[]} 分析結果
+	 * @param {Boolean} isMultiLine 複数行の文章かどうか
+	 * 
+	 * @return {Kuromoji.IpadicFeatures[] | Kuromoji.IpadicFeatures[][]} 分析結果
 	 */
-	tokenize (text) {
+	tokenize (text, isMultiLine) {
 		if (typeof text !== "string") throw new ArgumentNotAcceptableError("text", 1, "String");
 
 		const { self } = this;
+
+		if (isMultiLine) {
+			const tokenizedCollection = [];
+			const delimiterMatcher = /(。|\r?\n)/g;
+
+			let prevIndex = 0;
+			while (delimiterMatcher.exec(text)) {
+				const sentence = text.slice(prevIndex, delimiterMatcher.lastIndex);
+				tokenizedCollection.push(this.tokenize(sentence));
+
+				prevIndex = delimiterMatcher.lastIndex;
+			}
+
+			return tokenizedCollection;
+		}
 		
 		const tokenized = self.tokenize(text);
 		tokenized.forEach((word, index) => tokenized[index].feeling = negaposiAnalyze([ word ]));
