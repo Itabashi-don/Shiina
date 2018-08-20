@@ -2,7 +2,7 @@ const fs = require("fs");
 const csv = require("csv");
 const iconv = require("iconv-lite");
 
-const { ArgumentNotAcceptableError } = require("./Errors");
+const { ArgumentNotAcceptableError } = require("./ShiinaError");
 
 
 

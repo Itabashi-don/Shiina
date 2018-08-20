@@ -1,13 +1,12 @@
-const fs = require("fs");
 const Mastodon = require("mastodon-api");
 
-const Initialize = require("./../libs/Initialize");
+const Initializer = require("./../libs/Initializer");
 const Logger = require("./../libs/Logger");
 const Generator = require("./../libs/Generator");
 
 
 
-/** @type {Initialize.ShiinaEnv} */
+/** @type {Initializer.ShiinaEnv} */
 const ENV = process.env;
 const mstdn = new Mastodon({ api_url: `${ENV.SHIINA_INSTANCE}/api/v1/`, access_token: ENV.SHIINA_TOKEN });
 

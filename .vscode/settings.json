@@ -1,8 +1,5 @@
 {
 	"eslint.options": {
-		"envs": ["es6", "browser", "node"],
-		"rules": {
-			"no-undef": "warn"
-		}
+		"envs": ["es6", "node"]
 	}
 }

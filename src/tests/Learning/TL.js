@@ -1,11 +1,11 @@
 const Mastodon = require("mastodon-api");
 
-const Initialize = require("./../libs/Initialize");
-const TokenizerPlus = require("./../libs/TokenizerPlus");
-const Logger = require("./../libs/Logger");
+const Initializer = require("./../../libs/Initializer");
+const Tokenizer = require("./../../libs/Tokenizer");
+const Logger = require("./../../libs/Logger");
 
-const Types = require("./../models/Types");
-const MorphableStatus = require("./../models/MorphableStatus");
+const Types = require("./../../models/Types");
+const MorphableStatus = require("./../../models/MorphableStatus");
 
 
 
@@ -31,7 +31,7 @@ class Formatter {
 
 
 
-/** @type {Initialize.ShiinaEnv} */
+/** @type {Initializer.ShiinaEnv} */
 const ENV = process.env;
 const mstdn = new Mastodon({ api_url: `${ENV.SHIINA_INSTANCE}/api/v1/`, access_token: ENV.SHIINA_TOKEN });
 
@@ -39,7 +39,7 @@ const logger = new Logger.AsyncArrayLogger(`${ENV.SHIINA_HOMEDIR}/${ENV.SHIINA_L
 logger.on("initialized").then(() => {
 	console.log("[logger] Initialized");
 
-	const tokenizer = new TokenizerPlus({ dicPath: `node_modules/kuromoji/dict` });
+	const tokenizer = new Tokenizer({ dicPath: `node_modules/kuromoji/dict` });
 	tokenizer.on("initialized").then(tokenizer => {
 		console.log("[tokenizer] Initialized");
 		

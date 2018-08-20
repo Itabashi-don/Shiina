@@ -3,9 +3,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const Mastodon = require("mastodon-api");
 
-const Initialize = require("./libs/Initialize");
+const Initializer = require("./libs/Initializer");
 const Logger = require("./libs/Logger");
-const TokenizerPlus = require("./libs/TokenizerPlus");
+const Tokenizer = require("./libs/Tokenizer");
 const Generator = require("./libs/Generator");
 
 const Types = require("./models/Types");
@@ -24,14 +24,14 @@ const Notification = require("./models/Notification");
  * > 板橋 + 区(接尾)
  */
 
-/** @type {Initialize.ShiinaEnv} */
+/** @type {Initializer.ShiinaEnv} */
 const ENV = process.env;
 
 const dialogue = new Logger.ArrayLogger(`${ENV.SHIINA_HOMEDIR}/${ENV.SHIINA_LOGPATH}`);
 const generator = new Generator(dialogue.log);
 
-/** @type {TokenizerPlus} */
-const tokenizer = new TokenizerPlus({ dicPath: `${ENV.SHIINA_HOMEDIR}/dict` });
+/** @type {Tokenizer} */
+const tokenizer = new Tokenizer({ dicPath: `${ENV.SHIINA_HOMEDIR}/dict` });
 tokenizer.on("initialized").then(() => console.info("Tokenizer has been ready."));
 
 /** @type {Mastodon} */
@@ -189,9 +189,9 @@ app.listen(ENV.SHIINA_PORT, () => {
 	console.log(`[Shiina | ${ENV.SHIINA_ENV}${ENV.SHIINA_MODE ? `(with ${ENV.SHIINA_MODE})` : ""}] おはよーっ！！ポート${ENV.SHIINA_PORT}で待ってるねっ♡(´˘\`๑)`);
 
 	if (ENV.SHIINA_ENV === "production") {
-		/*return mstdn.post("statuses", {
+		return mstdn.post("statuses", {
 			status: "板橋の民おはよっ！！"
-		});*/
+		});
 	}
 
 	switch (ENV.SHIINA_MODE) {

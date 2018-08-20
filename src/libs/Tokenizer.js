@@ -1,7 +1,7 @@
 const Kuromoji = require("kuromoji");
 const negaposiAnalyze = require("negaposi-analyzer-ja");
 
-const { ArgumentNotAcceptableError, ArgumentNotDefinedError } = require("./Errors");
+const { ArgumentNotAcceptableError, ArgumentNotDefinedError } = require("./ShiinaError");
 
 
 
@@ -9,9 +9,9 @@ const { ArgumentNotAcceptableError, ArgumentNotDefinedError } = require("./Error
  * Tokenizerを拡張したクラス
  * @author Genbu Hase
  */
-class TokenizerPlus {
+class Tokenizer {
 	/**
-	 * TokenizerPlusを生成します
+	 * Tokenizerを生成します
 	 * @param {Kuromoji.TokenizerBuilderOption} option Tokenizerのオプション
 	 */
 	constructor (option) {
@@ -30,15 +30,15 @@ class TokenizerPlus {
 	/**
 	 * イベントを登録します
 	 * 
-	 * @param {TokenizerPlus.EventType} eventType イベント名
-	 * @param {TokenizerPlus.EventCallback} [callback] イベント発火時のコールバック
+	 * @param {Tokenizer.EventType} eventType イベント名
+	 * @param {Tokenizer.EventCallback} [callback] イベント発火時のコールバック
 	 * 
-	 * @return {Promise<TokenizerPlus>} イベント発火時に呼ばれるPromise
+	 * @return {Promise<Tokenizer>} イベント発火時に呼ばれるPromise
 	 */
 	on (eventType, callback) {
 		switch (eventType) {
 			default:
-				throw new ArgumentNotAcceptableError("eventType", 1, "TokenizerPlus.EventType.*");
+				throw new ArgumentNotAcceptableError("eventType", 1, "Tokenizer.EventType.*");
 
 			case "initialized":
 				return new Promise(resolve => {
@@ -136,17 +136,17 @@ class TokenizerPlus {
 }
 
 /**
- * TokenizerPlusのイベントタイプ
- * @typedef {"initialized"} TokenizerPlus.EventType
+ * Tokenizerのイベントタイプ
+ * @typedef {"initialized"} Tokenizer.EventType
  */
 
 /**
- * TokenizerPlusのイベントコールバック
+ * Tokenizerのイベントコールバック
  * 
- * @callback TokenizerPlus.EventCallback
- * @param {TokenizerPlus} tokenizer 発火したイベントの要素
+ * @callback Tokenizer.EventCallback
+ * @param {Tokenizer} tokenizer 発火したイベントの要素
  */
 
 
 
-module.exports = TokenizerPlus;
+module.exports = Tokenizer;

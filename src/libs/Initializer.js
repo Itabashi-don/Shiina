@@ -1,5 +1,5 @@
 const fs = require("fs");
-const { EnvironmentNotDefinedError } = require("./Errors");
+const { EnvironmentNotDefinedError } = require("./ShiinaError");
 
 
 

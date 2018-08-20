@@ -8,7 +8,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "しいちゃん、おはよっ！！",
-			"program": "${workspaceFolder}/src/index.js",
+			"program": "${workspaceFolder}/src/shiina.js",
 
 			"env": {
 				"SHIINA_ENV": "development",
@@ -20,7 +20,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "しいちゃん、デバッグ手伝って！",
-			"program": "${workspaceFolder}/src/index.js",
+			"program": "${workspaceFolder}/src/shiina.js",
 
 			"env": {
 				"SHIINA_ENV": "development",
@@ -33,7 +33,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "しいちゃん、お勉強しよ！！",
-			"program": "${workspaceFolder}/src/index.js",
+			"program": "${workspaceFolder}/src/shiina.js",
 
 			"env": {
 				"SHIINA_ENV": "development",
@@ -44,8 +44,8 @@
 		{
 			"type": "node",
 			"request": "launch",
-			"name": "LearningTest",
-			"program": "${workspaceFolder}/src/tests/LearningTest.js",
+			"name": "TL-LearningTest",
+			"program": "${workspaceFolder}/src/tests/Learning/TL.js",
 
 			"env": {
 				"SHIINA_ENV": "development",
