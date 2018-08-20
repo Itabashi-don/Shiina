@@ -113,25 +113,21 @@ let app = express();
 	app.use(bodyParser.json());
 	app.use("/", express.static(`${ENV.SHIINA_HOMEDIR}/src/views`));
 
-	app.post("/register", (req, res) => {
+	app.post("/api/register", (req, res) => {
 		const { text } = req.body;
 
 		if (!tokenizer.initialized) {
-			res.status(503).end(JSON.stringify({
+			return res.status(503).end(JSON.stringify({
 				state: "failure",
 				error: "Tokenizer has never initialized."
 			}));
-
-			return;
 		}
 
 		if (!text) {
-			res.status(400).end(JSON.stringify({
+			return res.status(400).end(JSON.stringify({
 				state: "failure",
 				error: "'text'(In payload) must be String."
 			}));
-
-			return;
 		}
 
 		const tokenized = tokenizer.tokenize(text);
@@ -143,7 +139,7 @@ let app = express();
 		}));
 	});
 
-	app.post("/generate", (req, res) => {
+	app.post("/api/generate", (req, res) => {
 		const { text, structure } = req.body;
 
 		res.end(JSON.stringify({
@@ -152,7 +148,7 @@ let app = express();
 		}));
 	});
 
-	app.post("/next", (req, res) => {
+	app.post("/api/next", (req, res) => {
 		const { text } = req.body;
 
 		res.end(JSON.stringify({
@@ -161,7 +157,7 @@ let app = express();
 		}));
 	});
 
-	app.post("/tokenize", (req, res) => {
+	app.post("/api/tokenize", (req, res) => {
 		const { text, isMultiLine } = req.body;
 
 		if (isMultiLine) {

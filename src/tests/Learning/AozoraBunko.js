@@ -27,7 +27,7 @@ const ENV = process.env;
 const tokenizer = new Tokenizer({ dicPath: `${ENV.SHIINA_HOMEDIR}/dict` });
 const logger = new Logger.AsyncArrayLogger(`${ENV.SHIINA_HOMEDIR}/logs/AB-structure.log`);
 
-/*Promise.all([tokenizer.on("initialized"), logger.on("initialized")]).then(([ tokenizer, logger ]) => {
+Promise.all([tokenizer.on("initialized"), logger.on("initialized")]).then(([ tokenizer, logger ]) => {
 	return fetch("http://pubserver2.herokuapp.com/api/v0.1/books?limit=1000").then(resp => resp.json()).then(books => {
 		return books.filter(book => book.font_kana_type === "新字新仮名" && book.text_url);
 	});
@@ -36,16 +36,11 @@ const logger = new Logger.AsyncArrayLogger(`${ENV.SHIINA_HOMEDIR}/logs/AB-struct
 	for (const book of books) {
 		ques.push(fetch(`http://pubserver2.herokuapp.com/api/v0.1/books/${book.book_id}/content?format=html`).then(resp => resp.arrayBuffer()).then(buf => {
 			const text = parseHtml(iconv.decode(new Buffer(buf), book.text_encoding));
-			const tokenized = tokenizer.tokenize(text);
 
-			//logger.put()
+			const tokenizedCollection = tokenizer.tokenize(text, true);
+			for (const tokenized of tokenizedCollection) logger.put(tokenized);
 		}));
 	}
 
 	return Promise.all(ques);
-}).then(() => logger.store()).then(() => process.kill(process.pid, "SIGINT"));*/
-
-fetch(`http://pubserver2.herokuapp.com/api/v0.1/books/${58058}/content?format=html`).then(resp => resp.arrayBuffer()).then(buf => {
-	const text = parseHtml(iconv.decode(new Buffer(buf), "Shift-JIS"));
-	console.log(text);
-});
+}).then(() => logger.store()).then(() => process.kill(process.pid, "SIGINT"));
