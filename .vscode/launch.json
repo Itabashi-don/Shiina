@@ -57,6 +57,18 @@
 		{
 			"type": "node",
 			"request": "launch",
+			"name": "青空文庫-LearningTest",
+			"program": "${workspaceFolder}/src/tests/Learning/AozoraBunko.js",
+
+			"env": {
+				"SHIINA_ENV": "development",
+				"SHIINA_MODE": ""
+			}
+		},
+
+		{
+			"type": "node",
+			"request": "launch",
 			"name": "GeneratingTest",
 			"program": "${workspaceFolder}/src/tests/GeneratingTest.js",
 
