@@ -13,7 +13,7 @@ const mstdn = new Mastodon({ api_url: `${ENV.SHIINA_INSTANCE}/api/v1/`, access_t
 const generator = new Generator();
 const dialogue = new Logger.AsyncArrayLogger(`${ENV.SHIINA_HOMEDIR}/${ENV.SHIINA_LOGPATH}`);
 dialogue.on("initialized").then(dialogue => {
-	generator.importLog(dialogue.log);
+	generator.importDatabase(dialogue.log);
 
 	//Generating texts in non-strict mode
 	for (let i = 0; i < 10; i++) {
@@ -34,7 +34,7 @@ dialogue.on("initialized").then(dialogue => {
 	//Generating texts in strict mode
 	for (let i = 0; i < 10; i++) {
 		const status = [
-			generator.generate("", true),
+			generator.generate(""),
 			"(In strict mode)",
 			""
 		].join("\r\n");

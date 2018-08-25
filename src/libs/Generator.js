@@ -9,190 +9,143 @@ const Kuromoji = require("kuromoji");
 class Generator {
 	/**
 	 * Generatorを生成します
-	 * @param {Kuromoji.IpadicFeatures[][]} logData 取り込むログデータ
+	 * @param {Kuromoji.IpadicFeatures[][]} dbData 取り込む形態素解析データ
 	 */
-	constructor (logData) {
+	constructor (dbData) {
 		/**
-		 * ログデータから抽出された単語辞書
+		 * 形態素解析データを基に生成された辞書
 		 * @type {Dictionary}
 		 */
 		this.dictionary = new Dictionary();
 
-		/**
-		 * 単語間連結リスト
-		 * @type {Object<string, Kuromoji.IpadicFeatures[]>}
-		 */
-		this.wordSet = {};
-
-		/**
-		 * 文法構造体セット
-		 * @type {String[][]}
-		 */
-		this.structureSet = [];
-
-		if (logData) this.importLog(logData);
+		if (dbData) this.importDatabase(dbData);
 	}
 
 	/**
-	 * データの登録を行います
-	 * @param {Kuromoji.IpadicFeatures[]} tokenized 文章の分析結果
+	 * 形態素解析データを取り込みます
+	 * @param {Kuromoji.IpadicFeatures[][]} dbData 取り込む形態素解析データ
 	 */
-	register (tokenized) {
-		const { dictionary, wordSet, structureSet } = this;
-
-		Array.prototype.push.apply(dictionary, tokenized);
-		structureSet.push(tokenized.map(word => word.pos));
-
-		tokenized.forEach((token, index, parent) => {
-			const nowToken = token;
-			const prevWord = parent[index - 1] ? parent[index - 1].surface_form : "";
-
-			if (!nowToken) return;
-
-			if (!wordSet[prevWord]) wordSet[prevWord] = [];
-			wordSet[prevWord].push(nowToken);
-		});
+	importDatabase (dbData) {
+		for (const tokenized of dbData) this.dictionary.register(tokenized);
 	}
 
 	/**
-	 * ログを取り込みます
-	 * @param {Kuromoji.IpadicFeatures[][]} logData 取り込むログデータ
-	 */
-	importLog (logData) {
-		for (const sentence of logData) this.register(sentence);
-	}
-
-	/**
-	 * 次に結合する文字を返します
+	 * 文章を生成します
 	 * 
-	 * @param {String} [word=""] 結合させる単語
-	 * @param {String | null} [structure=null] 結合する単語の品詞
+	 * @param {String} [vocabulary=""] 開始する単語
+	 * @param {String[]} [structure=[]] 文章の文法構造
 	 * 
-	 * @return {Kuromoji.IpadicFeatures} 結合する単語
+	 * @return {String} 生成された文章
 	 */
-	next (word = "", structure = null) {
-		const { dictionary, wordSet } = this;
+	generate (vocabulary = "", structure = []) {
+		const { dictionary } = this;
 
-		if (!wordSet[word]) return;
+		const nounDic = dictionary.vocabularies.orderBy({ pos: "名詞" });
+		const verbDic = dictionary.vocabularies.orderBy({ pos: "動詞" });
 
-		const words = wordSet[word];
-		const structures = words.map(word => word.pos);
-		const currentStructure = structures[Math.floor(Math.random() * structures.length)];
-
-		if (!word) {
-			const matchedWords = dictionary.orderByStructure(structure || currentStructure);
-			return matchedWords[Math.floor(Math.random() * matchedWords.length)];
-		}
+		const structureBase = structure.length ? structure : dictionary.structures.pickUp();
 		
-		const matchedWords = words.filter(word => word.pos === (structure || currentStructure));
-		return matchedWords[Math.floor(Math.random() * matchedWords.length)];
-	}
-
-	/**
-	 * 文章を合成します
-	 * 
-	 * @param {String} [word=""] 開始する単語
-	 * @param {String[]} [structures=[]] 文章の文法構造
-	 * 
-	 * @return {String} 合成された文章
-	 */
-	generate (word = "", structures = []) {
-		const { structureSet } = this;
-		if (!structures.length) structures = structureSet[Math.floor(Math.random() * structureSet.length)];
-		
-		const content = [ word ];
-		
-		let next = word;
-		let counter = 0;
-		while (counter < structures.length && (next = this.next(next, structures[counter]))) {
-			next = next.surface_form;
-			counter++;
-
-			if (content.length >= 200) break;
-			content.push(next);
+		let sentence = "";
+		for (const token of structureBase) {
+			if (!["名詞", "動詞"].includes(token.pos)) {
+				sentence += token.surface_form;
+			} else {
+				sentence += dictionary.vocabularies.orderBy({ pos: token.pos }).pickUp().surface_form;
+			}
 		}
 
-		return content.join("");
+		return sentence;
 	}
 }
 
 /**
- * 学習データの格納オブジェクト
+ * 学習データの辞書
+ * @author Genbu Hase
+ */
+class Dictionary {
+	/** Dictionaryを生成します */
+	constructor () {
+		/**
+		 * 語彙辞書
+		 * @type {VocabularyDictionary}
+		 */
+		this.vocabularies = new VocabularyDictionary();
+
+		/**
+		 * 文法構造辞書
+		 * @type {StructureDictionary}
+		 */
+		this.structures = new StructureDictionary();
+	}
+
+	/**
+	 * 解析結果を登録します
+	 * @param {Kuromoji.IpadicFeatures[]} tokenized 文章の形態素解析結果
+	 */
+	register (tokenized) {
+		this.vocabularies.register(tokenized);
+		this.structures.register(tokenized);
+	}
+}
+
+/**
+ * 語彙データの辞書
  * 
  * @extends Array<Kuromoji.IpadicFeatures>
  * @author Genbu Hase
  */
-class Dictionary extends Array {
-	/** Dictionaryを生成します */
-	constructor () {
-		super();
-	}
+class VocabularyDictionary extends Array {
+	constructor () { super() }
 
 	/**
-	 * 指定された条件を満たした単語で構成された辞書を返します
+	 * 語彙データを登録します
+	 * @param {Kuromoji.IpadicFeatures[]} tokenized 文章の形態素解析結果
+	 */
+	register (tokenized) { this.push(...tokenized) }
+
+	/**
+	 * 語彙データをランダムで抽出します
+	 * @return {Kuromoji.IpadicFeatures}
+	 */
+	pickUp () { return this[Math.floor(Math.random() * this.length)] }
+
+	/**
+	 * 指定された条件が満たされる語彙で構成された辞書を返します
 	 * 
-	 * @param {Object} conditions 単語の条件
-	 * @return {Dictionary} 条件を満たした単語で構成された辞書
+	 * @param {Object} conditions 満たされる条件
+	 * @return {VocabularyDictionary} 構成された辞書
 	 */
 	orderBy (conditions = {}) {
-		return this.filter(word => {
+		return this.filter(vocab => {
 			for (const prop in conditions) {
-				if (word[prop] !== conditions[prop]) return false;
+				if (vocab[prop] !== conditions[prop]) return false;
 			}
 
 			return true;
 		});
 	}
-
-	/**
-	 * 指定された品詞の単語で構成された辞書を返します
-	 * 
-	 * @param {String} type 品詞
-	 * @return {Dictionary} 特定の品詞の単語で構成された辞書
-	 */
-	orderByStructure (type) {
-		return this.filter(word => word.pos === type);
-	}
 }
 
 /**
- * 単語構造を格納するオブジェクト
+ * 文法構造データの辞書
+ * 
+ * @extends Array<Array<Kuromoji.IpadicFeatures>>
  * @author Genbu Hase
  */
-class Structure {
-	static get DELIMITOR () { return "/" }
+class StructureDictionary extends Array {
+	constructor () { super() }
 
 	/**
-	 * 指定されたStructureからマッチ条件を生成します
-	 * @param {Structure} structure
+	 * 文法構造データを登録します
+	 * @param {Kuromoji.IpadicFeatures[]} tokenized 文章の形態素解析結果
 	 */
-	static createCondition (structure) {
-		const structures = structure.structure.split(Structure.DELIMITOR);
-		const [ pos = "*", pos_detail_1 = "*", pos_detail_2 = "*", pos_detail_3 = "*" ] = structures;
-
-		return { pos, pos_detail_1, pos_detail_2, pos_detail_3 };
-	}
-
-
+	register (tokenized) { this.push(tokenized) }
 
 	/**
-	 * Structureを生成します
-	 * @param {Kuromoji.IpadicFeatures} word
+	 * 文法構造データをランダムで抽出します
+	 * @return {Kuromoji.IpadicFeatures[]}
 	 */
-	constructor (word) {
-		this.word = word;
-	}
-
-	get structure () {
-		const { pos, pos_detail_1, pos_detail_2, pos_detail_3 } = this.word;
-
-		let structure = pos;
-		for (const detail of [ pos_detail_1, pos_detail_2, pos_detail_3 ]) {
-			if (detail && detail !== "*") structure += Structure.DELIMITOR + detail;
-		}
-
-		return structure;
-	}
+	pickUp () { return this[Math.floor(Math.random() * this.length)] }
 }
 
 
