@@ -1,4 +1,4 @@
-# 環境変数一覧(A list of environment)
+# 環境変数(Environments)
 
 
 
