@@ -35,7 +35,7 @@ class Formatter {
 const ENV = process.env;
 const mstdn = new Mastodon({ api_url: `${ENV.SHIINA_INSTANCE}/api/v1/`, access_token: ENV.SHIINA_TOKEN });
 
-const logger = new Logger.AsyncArrayLogger(`${ENV.SHIINA_HOMEDIR}/${ENV.SHIINA_LOGPATH}`);
+const logger = new Logger.AsyncArrayLogger(`${ENV.SHIINA_HOMEDIR}/${ENV.SHIINA_DBPATH}`);
 logger.on("initialized").then(() => {
 	console.log("[logger] Initialized");
 

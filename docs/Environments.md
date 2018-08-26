@@ -26,7 +26,7 @@
   * リプ内容をevalして返す
 
 
-### SHIINA_LOGPATH(String型) <初期値: `"logs/dialogue.log"`>
+### SHIINA_DBPATH(String型) <初期値: `"db/dialogue.db"`>
 学習状況を保存するファイルのパス
 
 

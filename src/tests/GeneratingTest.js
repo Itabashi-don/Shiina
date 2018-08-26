@@ -12,14 +12,14 @@ const ENV = process.env;
 const mstdn = new Mastodon({ api_url: `${ENV.SHIINA_INSTANCE}/api/v1/`, access_token: ENV.SHIINA_TOKEN });
 
 const generator = new Generator();
-const dialogue = new Logger.AsyncArrayLogger(`${ENV.SHIINA_HOMEDIR}/${ENV.SHIINA_LOGPATH}`);
+const dialogue = new Logger.AsyncArrayLogger(`${ENV.SHIINA_HOMEDIR}/${ENV.SHIINA_DBPATH}`);
 dialogue.on("initialized").then(dialogue => {
 	generator.importDatabase(dialogue.log);
 
-	/*const genboo = JSON.parse(fs.readFileSync(`${ENV.SHIINA_HOMEDIR}/logs/Genboo.log`));
+	/*const genboo = JSON.parse(fs.readFileSync(`${ENV.SHIINA_HOMEDIR}/db/Itabashi_ProgrammerGenboo.db`));
 	for (const tokenized of genboo) generator.dictionary.vocabularies.register(tokenized);*/
 
-	/*const friends_nico = JSON.parse(fs.readFileSync(`${ENV.SHIINA_HOMEDIR}/logs/friends_nico.log`));
+	/*const friends_nico = JSON.parse(fs.readFileSync(`${ENV.SHIINA_HOMEDIR}/db/friends_nico.db`));
 	for (const tokenized of friends_nico) generator.dictionary.vocabularies.register(tokenized);*/
 
 	//Generating sentences

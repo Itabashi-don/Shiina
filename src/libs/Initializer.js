@@ -12,7 +12,7 @@ class Environment {
 		self.SHIINA_HOMEDIR = process.cwd();
 		self.SHIINA_ENV = self.SHIINA_ENV || "production";
 		self.SHIINA_MODE = (self.SHIINA_ENV === "development" && self.SHIINA_MODE) || "";
-		self.SHIINA_LOGPATH = self.SHIINA_LOGPATH || "logs/dialogue.log";
+		self.SHIINA_DBPATH = self.SHIINA_DBPATH || "db/dialogue.db";
 		self.SHIINA_PORT = self.SHIINA_PORT || 8001;
 		
 		if (self.SHIINA_ENV === "development") require("dotenv").config();
@@ -29,14 +29,14 @@ class Environment {
  * @prop {String} SHIINA_TOKEN 動作させるアカウントのトークン
  * @prop {"production" | "development"} [SHIINA_ENV="production"] 動作環境
  * @prop {"" | "learning" | "debug"} [SHIINA_MODE=""] 動作モード
- * @prop {String} [SHIINA_LOGPATH="logs/dialogue.log"] 学習状況を保存するファイルのパス
+ * @prop {String} [SHIINA_DBPATH="db/dialogue.db"] 学習状況を保存するファイルのパス
  * @prop {Number} [SHIINA_PORT=8001] Shiinaを動かすポート
  */
 
 
 
 class DirStructure {
-	static get DIRS () { return ["logs"] }
+	static get DIRS () { return ["db"] }
 	static get FILES () { return [".env"] }
 	static get JSONS () {
 		return {

@@ -27,7 +27,7 @@ const Notification = require("./models/Notification");
 /** @type {Initializer.ShiinaEnv} */
 const ENV = process.env;
 
-const dialogue = new Logger.ArrayLogger(`${ENV.SHIINA_HOMEDIR}/${ENV.SHIINA_LOGPATH}`);
+const dialogue = new Logger.ArrayLogger(`${ENV.SHIINA_HOMEDIR}/${ENV.SHIINA_DBPATH}`);
 const generator = new Generator(dialogue.log);
 
 /** @type {Tokenizer} */

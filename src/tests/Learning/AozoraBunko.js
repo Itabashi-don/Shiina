@@ -25,7 +25,7 @@ const parseHtml = htmlStr => {
 const ENV = process.env;
 
 const tokenizer = new Tokenizer({ dicPath: `${ENV.SHIINA_HOMEDIR}/dict` });
-const logger = new Logger.AsyncArrayLogger(`${ENV.SHIINA_HOMEDIR}/logs/AB.log`);
+const logger = new Logger.AsyncArrayLogger(`${ENV.SHIINA_HOMEDIR}/db/aozorabunko.db`);
 
 Promise.all([tokenizer.on("initialized"), logger.on("initialized")]).then(() => {
 	return fetch("http://pubserver2.herokuapp.com/api/v0.1/books?limit=1000").then(resp => resp.json()).then(books => {
