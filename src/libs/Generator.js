@@ -60,7 +60,7 @@ class Generator {
 		let sentence = "";
 		structureBase.forEach((token, index) => {
 			const { pos, pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form } = token;
-			const currentConnections = dictionary.connections.pickUp(structureBase[index - 1] && structureBase[index - 1]);
+			const vocabDic = new VocabularyDictionary();
 
 			let result = "";
 			switch (true) {
@@ -68,13 +68,20 @@ class Generator {
 					result = token.surface_form;
 					break;
 
-				case pos === "名詞" && !["接尾"].includes(pos_detail_1):
-					result = nounDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
+				case pos === "名詞" && !["数", "接尾"].includes(pos_detail_1):
+					if (0 < index) vocabDic.register([ dictionary.connections.pickUp(structureBase[index - 1].surface_form) ]);
+
+					if (vocabDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3 }).length) {
+						result = vocabDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
+					} else {
+						result = nounDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
+					}
+
 					break;
 
-				case pos === "動詞":
+				/*case pos === "動詞":
 					result = verbDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form }).pickUp().surface_form;
-					break;
+					break;*/
 			}
 
 			sentence += result;
@@ -219,12 +226,20 @@ class ConnectionDictionary {
 	}
 
 	/**
-	 * 指定された語彙に関連付いた語彙データを、ランダムで抽出します
+	 * 指定された語彙に関連付けられた語彙が存在するかどうか返します
 	 * 
-	 * @param {String} [vocabulary=""] 関連付けられた語彙
+	 * @param {String} [vocabulary=""] 関連付いた語彙
+	 * @return {Boolean}
+	 */
+	isAvailable (vocabulary = "") { return this[vocabulary] && this[vocabulary].length }
+
+	/**
+	 * 指定された語彙に関連付けられた語彙をランダムで抽出します
+	 * 
+	 * @param {String} [vocabulary=""] 関連付いた語彙
 	 * @return {Kuromoji.IpadicFeatures[]}
 	 */
-	pickUp (vocabulary = "") { return this[vocabulary] && this[vocabulary][Math.floor(Math.random() * this[vocabulary].length)] }
+	pickUp (vocabulary = "") { return this.isAvailable(vocabulary) && this[vocabulary][Math.floor(Math.random() * this[vocabulary].length)] }
 }
 
 

@@ -52,6 +52,18 @@
 				"SHIINA_MODE": "",
 				"SHIINA_DBPATH": "db/kantei.go.jp/20180720kaiken.db"
 			}
+		},
+
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "GeneratingFromSampleTest",
+			"program": "${workspaceFolder}/src/tests/GeneratingFromSampleTest.js",
+
+			"env": {
+				"SHIINA_ENV": "development",
+				"SHIINA_MODE": ""
+			}
 		}
 	]
 }
