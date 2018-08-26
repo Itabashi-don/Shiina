@@ -71,17 +71,25 @@ class Generator {
 				case pos === "名詞" && !["数", "接尾"].includes(pos_detail_1):
 					if (0 < index) vocabDic.register([ dictionary.connections.pickUp(structureBase[index - 1].surface_form) ]);
 
-					if (vocabDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3 }).length) {
-						result = vocabDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
+					if (vocabDic.orderBy({ pos, pos_detail_1, pos_detail_2, pos_detail_3 }).length) {
+						result = vocabDic.orderBy({ pos, pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
 					} else {
 						result = nounDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
 					}
 
 					break;
 
-				/*case pos === "動詞":
-					result = verbDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form }).pickUp().surface_form;
-					break;*/
+				case pos === "動詞":
+					// 後方参照も含める
+					if (0 < index) vocabDic.register([ dictionary.connections.pickUp(structureBase[index - 1].surface_form) ]);
+
+					if (vocabDic.orderBy({ pos, pos_detail_1, pos_detail_2, pos_detail_3 }).length) {
+						result = vocabDic.orderBy({ pos, pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
+					} else {
+						result = verbDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
+					}
+
+					break;
 			}
 
 			sentence += result;
