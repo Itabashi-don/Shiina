@@ -3,14 +3,14 @@
 ```Json
 {
 	"createdAt": [2018, 8, 25],
-	"updatedAt": [2018, 8, 25]
+	"updatedAt": [2018, 8, 26]
 }
 ```
 
 
 
 ## 前提処理
-1.	[pubserver2](https://github.com/aozorahack/pubserver2)を介して、[青空文庫](https://www.aozora.gr.jp)に登録されている文書の形態素解析を行う
+1.	[総理の演説・記者会見など | 記者会見 | 首相官邸ホームページ](https://www.kantei.go.jp/jp/98_abe/statement)に掲載されている文書の形態素解析を行う
 
 
 

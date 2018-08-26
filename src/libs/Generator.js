@@ -33,7 +33,7 @@ class Generator {
 	 * 文章を生成します
 	 * 
 	 * @param {String} [vocabulary=""] 開始する単語
-	 * @param {String[]} [structure=[]] 文章の文法構造
+	 * @param {Kuromoji.IpadicFeatures[]} [structure=[]] 文章の文法構造
 	 * 
 	 * @return {String} 生成された文章
 	 */
@@ -41,16 +41,26 @@ class Generator {
 		const { dictionary } = this;
 
 		const nounDic = dictionary.vocabularies.orderBy({ pos: "名詞" });
-		const verbDic = dictionary.vocabularies.orderBy({ pos: "動詞" });
+		//const verbDic = dictionary.vocabularies.orderBy({ pos: "動詞" });
 
 		const structureBase = structure.length ? structure : dictionary.structures.pickUp();
 		
 		let sentence = "";
 		for (const token of structureBase) {
-			if (!["名詞", "動詞"].includes(token.pos)) {
-				sentence += token.surface_form;
-			} else {
-				sentence += dictionary.vocabularies.orderBy({ pos: token.pos }).pickUp().surface_form;
+			const { pos, pos_detail_1, pos_detail_2, pos_detail_3 } = token;
+
+			switch (true) {
+				default:
+					sentence += token.surface_form;
+					break;
+
+				case pos === "名詞":
+					sentence += nounDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
+					break;
+
+				/*case pos === "動詞":
+					sentence += verbDic.pickUp().surface_form;
+					break;*/
 			}
 		}
 
@@ -112,19 +122,30 @@ class VocabularyDictionary extends Array {
 	/**
 	 * 指定された条件が満たされる語彙で構成された辞書を返します
 	 * 
-	 * @param {Object} conditions 満たされる条件
+	 * @param {Object | VocabularyDictionary.OrderByCallback} conditionsOrCallback 満たされる条件 | 条件判別式
 	 * @return {VocabularyDictionary} 構成された辞書
 	 */
-	orderBy (conditions = {}) {
+	orderBy (conditionsOrCallback = {}) {
 		return this.filter(vocab => {
-			for (const prop in conditions) {
-				if (vocab[prop] !== conditions[prop]) return false;
+			if (typeof conditionsOrCallback === "function") return conditionsOrCallback(vocab);
+			
+			for (const prop in conditionsOrCallback) {
+				if (vocab[prop] !== conditionsOrCallback[prop]) return false;
 			}
 
 			return true;
 		});
 	}
 }
+
+/**
+ * それぞれの語彙に対し、条件を満たすかどうか確認する関数
+ * 
+ * @callback VocabularyDictionary.OrderByCallback
+ * @param {Kuromoji.IpadicFeatures} vocabulary 語彙
+ */
+
+
 
 /**
  * 文法構造データの辞書

@@ -44,38 +44,13 @@
 		{
 			"type": "node",
 			"request": "launch",
-			"name": "TL-LearningTest",
-			"program": "${workspaceFolder}/src/tests/Learning/TL.js",
-
-			"env": {
-				"SHIINA_ENV": "development",
-				"SHIINA_MODE": "",
-				"SHIINA_LOGPATH": "logs/Genboo.log"
-			}
-		},
-
-		{
-			"type": "node",
-			"request": "launch",
-			"name": "青空文庫-LearningTest",
-			"program": "${workspaceFolder}/src/tests/Learning/AozoraBunko.js",
-
-			"env": {
-				"SHIINA_ENV": "development",
-				"SHIINA_MODE": ""
-			}
-		},
-
-		{
-			"type": "node",
-			"request": "launch",
 			"name": "GeneratingTest",
 			"program": "${workspaceFolder}/src/tests/GeneratingTest.js",
 
 			"env": {
 				"SHIINA_ENV": "development",
 				"SHIINA_MODE": "",
-				"SHIINA_LOGPATH": "logs/Genboo.log"
+				"SHIINA_LOGPATH": "db/kantei.go.jp/20180720_安倍内閣総理大臣記者会見.txt"
 			}
 		}
 	]

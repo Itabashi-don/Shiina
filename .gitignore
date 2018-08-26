@@ -60,6 +60,9 @@ typings/
 # next.js build output
 .next
 
-# Debug files
+# Shiina production files
+db/
 dict/
+
+# Debug files
 samples/

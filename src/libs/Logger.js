@@ -1,4 +1,5 @@
 const fs = require("fs");
+const fsEx = require("fs-extra");
 const csv = require("csv");
 const iconv = require("iconv-lite");
 
@@ -37,7 +38,11 @@ class Logger {
 		this.path = logPath;
 		this.encoding = encoding;
 
-		if (!fs.existsSync(logPath)) fs.writeFileSync(logPath, Logger.encode(this.initialState, { after: encoding }));
+		if (!fs.existsSync(logPath)) {
+			fsEx.mkdirsSync(logPath.split("/").slice(0, -1).join("/"));
+			fs.writeFileSync(logPath, Logger.encode(this.initialState, { after: encoding }));
+		}
+
 		this.load();
 
 		this._storeTimer = setInterval(() => this.store(), 10000);
