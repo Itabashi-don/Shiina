@@ -58,27 +58,33 @@ class Generator {
 		const structureBase = structure.length ? structure : dictionary.structures.pickUp();
 		
 		let sentence = "";
-		for (const token of structureBase) {
+		structureBase.forEach((token, index) => {
 			const { pos, pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form } = token;
+			const currentConnections = dictionary.connections.pickUp(structureBase[index - 1] && structureBase[index - 1]);
 
+			let result = "";
 			switch (true) {
 				default:
-					sentence += token.surface_form;
+					result = token.surface_form;
 					break;
 
-				case pos === "名詞":
-					sentence += nounDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
+				case pos === "名詞" && !["接尾"].includes(pos_detail_1):
+					result = nounDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
 					break;
 
 				case pos === "動詞":
-					sentence += verbDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form }).pickUp().surface_form;
+					result = verbDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form }).pickUp().surface_form;
 					break;
 			}
-		}
+
+			sentence += result;
+		});
 
 		return sentence;
 	}
 }
+
+
 
 /**
  * 学習データの辞書
@@ -98,6 +104,12 @@ class Dictionary {
 		 * @type {StructureDictionary}
 		 */
 		this.structures = new StructureDictionary();
+
+		/**
+		 * 語彙間連結辞書
+		 * @type {ConnectionDictionary}
+		 */
+		this.connections = new ConnectionDictionary();
 	}
 
 	/**
@@ -107,8 +119,11 @@ class Dictionary {
 	register (tokenized) {
 		this.vocabularies.register(tokenized);
 		this.structures.register(tokenized);
+		this.connections.register(tokenized);
 	}
 }
+
+
 
 /**
  * 語彙データの辞書
@@ -134,7 +149,7 @@ class VocabularyDictionary extends Array {
 	/**
 	 * 指定された条件が満たされる語彙で構成された辞書を返します
 	 * 
-	 * @param {Object | VocabularyDictionary.OrderByCallback} conditionsOrCallback 満たされる条件 | 条件判別式
+	 * @param {Kuromoji.IpadicFeatures | VocabularyDictionary.OrderByCallback} conditionsOrCallback 満たされる条件 | 条件判別式
 	 * @return {VocabularyDictionary} 構成された辞書
 	 */
 	orderBy (conditionsOrCallback = {}) {
@@ -179,6 +194,37 @@ class StructureDictionary extends Array {
 	 * @return {Kuromoji.IpadicFeatures[]}
 	 */
 	pickUp () { return this[Math.floor(Math.random() * this.length)] }
+}
+
+
+
+/**
+ * 語彙間連結データの辞書
+ * @author Genbu Hase
+ */
+class ConnectionDictionary {
+	constructor () { }
+
+	/**
+	 * 語彙間連結データを登録します
+	 * @param {Kuromoji.IpadicFeatures[]} tokenized 文章の形態素解析結果
+	 */
+	register (tokenized) {
+		tokenized.reduce((prev, now) => {
+			if (!this[prev.surface_form]) this[prev.surface_form] = [];
+			this[prev.surface_form].push(now);
+
+			return now;
+		});
+	}
+
+	/**
+	 * 指定された語彙に関連付いた語彙データを、ランダムで抽出します
+	 * 
+	 * @param {String} [vocabulary=""] 関連付けられた語彙
+	 * @return {Kuromoji.IpadicFeatures[]}
+	 */
+	pickUp (vocabulary = "") { return this[vocabulary] && this[vocabulary][Math.floor(Math.random() * this[vocabulary].length)] }
 }
 
 
