@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const Mastodon = require("mastodon-api");
 
 const Initializer = require("./libs/Initializer");
+const { PayloadNotAcceptableError } = require("./libs/ShiinaError");
 const Logger = require("./libs/Logger");
 const Tokenizer = require("./libs/Tokenizer");
 const Generator = require("./libs/Generator");
@@ -17,74 +18,46 @@ const Notification = require("./models/Notification");
 /** @type {Initializer.ShiinaEnv} */
 const ENV = process.env;
 
-const dialogue = new Logger.ArrayLogger(`${ENV.SHIINA_HOMEDIR}/${ENV.SHIINA_DBPATH}`);
-const generator = new Generator(dialogue.log);
-
-/** @type {Tokenizer} */
+const dialogue = new Logger.AsyncArrayLogger(`${ENV.SHIINA_HOMEDIR}/${ENV.SHIINA_DBPATH}`);
 const tokenizer = new Tokenizer({ dicPath: `${ENV.SHIINA_HOMEDIR}/dict` });
-tokenizer.on("initialized").then(() => console.info("Tokenizer has been ready."));
+const generator = new Generator();
 
-/** @type {Mastodon} */
 const mstdn = new Mastodon({ api_url: `${ENV.SHIINA_INSTANCE}/api/v1/`, access_token: ENV.SHIINA_TOKEN });
 
-let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/public" : "streaming/user");
-	homeTimeline.on("error", error => { throw error });
-	
-	homeTimeline.on("message",
-		/** @param {Types.Stream} stream */
-		stream => {
-			if (stream.event === "update") {
-				if (ENV.SHIINA_ENV === "development" && ENV.SHIINA_MODE === "learning") {
-					if (!tokenizer.initialized) return;
+Promise.all([ dialogue.on("initialized"), tokenizer.on("initialized") ]).then(() => {
+	console.info("Loading had been completed.");
 
-					const status = new MorphableStatus(stream.data);
-					
-					if (!status.account.bot && status.language === "ja") {
-						const tokenized = tokenizer.tokenize(status.morphableContent);
-						dialogue.put(tokenized);
+	generator.importDatabase(dialogue.log);
+}).then(() => {
+	const tl = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/public" : "streaming/user");
+	tl.on("error", error => { throw error });
 
-						console.info(dialogue.length);
-						return;
-					}
+	tl.on("message", /** @param {Types.Stream} stream */ stream => {
+		if (stream.event === "update") {
+			if (ENV.SHIINA_ENV === "development" && ENV.SHIINA_MODE === "learning") {
+				const status = new MorphableStatus(stream.data);
+				
+				if (!status.account.bot && status.language === "ja") {
+					const tokenized = tokenizer.tokenize(status.morphableContent);
+					dialogue.put(tokenized);
+
+					console.info(dialogue.length);
+					return;
 				}
 			}
+		}
 
-			if (stream.event === "notification") {
-				const notify = new Notification(stream.data);
+		if (stream.event === "notification") {
+			const notify = new Notification(stream.data);
 
-				if (notify.type === "mention") {
-					const { account, id, sensitive, spoiler_text, visibility, plainContent } = notify.status;
+			if (notify.type === "mention") {
+				const { account, id, sensitive, spoiler_text, visibility, plainContent } = notify.status;
 
-					if (ENV.SHIINA_MODE === "debug") {
-						return mstdn.post("statuses", {
-							status: [
-								`@${account.acct}`,
-								eval(plainContent.split(/\r?\n/).slice(1).join("\r\n"))
-							].join("\r\n"),
-
-							sensitive,
-							spoiler_text,
-							in_reply_to_id: id,
-							visibility
-						});
-					}
-
-					/*return mstdn.post("statuses", {
-						status: [
-							`@${account.acct}`,
-							"お呼びですかーっ！？？✌︎('ω'✌︎ )"
-						].join("\r\n"),
-
-						sensitive,
-						spoiler_text,
-						in_reply_to_id: id,
-						visibility
-					});*/
-
+				if (ENV.SHIINA_MODE === "debug") {
 					return mstdn.post("statuses", {
 						status: [
 							`@${account.acct}`,
-							generator.generate("")
+							eval(plainContent.split(/\r?\n/).slice(1).join("\r\n"))
 						].join("\r\n"),
 
 						sensitive,
@@ -93,35 +66,41 @@ let homeTimeline = mstdn.stream(ENV.SHIINA_MODE === "learning" ? "streaming/publ
 						visibility
 					});
 				}
+
+				return mstdn.post("statuses", {
+					status: [
+						`@${account.acct}`,
+						generator.generate()
+					].join("\r\n"),
+
+					sensitive,
+					spoiler_text,
+					in_reply_to_id: id,
+					visibility
+				});
 			}
 		}
-	);
+	});
 
+	return;
+}).then(() => {
+	const app = express();
 
-
-let app = express();
 	app.use(bodyParser.json());
 	app.use("/", express.static(`${ENV.SHIINA_HOMEDIR}/src/views`));
 
 	app.post("/api/register", (req, res) => {
 		const { text } = req.body;
 
-		if (!tokenizer.initialized) {
-			return res.status(503).end(JSON.stringify({
-				state: "failure",
-				error: "Tokenizer has never initialized."
-			}));
-		}
-
-		if (!text) {
+		if (!text || typeof text !== "string") {
 			return res.status(400).end(JSON.stringify({
 				state: "failure",
-				error: "'text'(In payload) must be String."
+				error: new PayloadNotAcceptableError("text", "String").message
 			}));
 		}
 
 		const tokenized = tokenizer.tokenize(text);
-		generator.register(tokenized);
+		generator.dictionary.register(tokenized);
 
 		res.end(JSON.stringify({
 			state: "success",
@@ -135,15 +114,6 @@ let app = express();
 		res.end(JSON.stringify({
 			state: "success",
 			text: generator.generate(text, structure)
-		}));
-	});
-
-	app.post("/api/next", (req, res) => {
-		const { text } = req.body;
-
-		res.end(JSON.stringify({
-			state: "success",
-			word: generator.next(text)
 		}));
 	});
 
@@ -166,20 +136,23 @@ let app = express();
 		res.end(JSON.stringify({ tokenized, propers }));
 	});
 
-app.listen(ENV.SHIINA_PORT, () => {
-	console.log(`[Shiina | ${ENV.SHIINA_ENV}${ENV.SHIINA_MODE ? `(with ${ENV.SHIINA_MODE})` : ""}] おはよーっ！！ポート${ENV.SHIINA_PORT}で待ってるねっ♡(´˘\`๑)`);
+	return app;
+}).then(app => {
+	app.listen(ENV.SHIINA_PORT, () => {
+		console.log(`[Shiina | ${ENV.SHIINA_ENV}${ENV.SHIINA_MODE ? `(with ${ENV.SHIINA_MODE})` : ""}] おはよーっ！！ポート${ENV.SHIINA_PORT}で待ってるねっ♡(´˘\`๑)`);
 
-	if (ENV.SHIINA_ENV === "production") {
-		return mstdn.post("statuses", {
-			status: "板橋の民おはよっ！！"
-		});
-	}
+		if (ENV.SHIINA_ENV === "production") {
+			return mstdn.post("statuses", {
+				status: "板橋の民おはよっ！！"
+			});
+		}
 
-	switch (ENV.SHIINA_MODE) {
-		case "learning":
-			/*return mstdn.post("statuses", {
-				status: "自習するぞーっ！",
-				visibility: "unlisted"
-			});*/
-	}
+		switch (ENV.SHIINA_MODE) {
+			case "learning":
+				return mstdn.post("statuses", {
+					status: "自習するぞーっ！",
+					visibility: "unlisted"
+				});
+		}
+	});
 });

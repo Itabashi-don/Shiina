@@ -42,6 +42,62 @@ class PropertyError extends TypeError {
 	get name () { return "PropertyError" }
 }
 
+/**
+ * 許容されないプロパティ型である事を示します
+ * 
+ * @extends PropertyError
+ * @author Genbu Hase
+ */
+class PropertyNotAcceptableError extends PropertyError {
+	/**
+	 * PropertyNotAcceptableErrorを生成します
+	 * 
+	 * @param {String} propName プロパティ名
+	 * @param {Number} [propIndex] プロパティのインデックス
+	 * @param {String | Array<String>} [acceptables] 許容されるプロパティ型名
+	 * @param {PropertyError.Label} [label=PropertyError.Label] プロパティのラベル定義
+	 */
+	constructor (propName, propIndex, acceptables, label = PropertyError.Label) {
+		if (!acceptables) {
+			super(propName, propIndex, "is not acceptable", label);
+		} else {
+			if (!Array.isArray(acceptables) || (Array.isArray(acceptables) && acceptables.length === 1)) {
+				super(propName, propIndex, `must be ${acceptables}`, label);
+			} else {
+				let listed = "";
+				acceptables.forEach((acceptable, index) => {
+					if (index === acceptables.length - 1) return listed += `or ${acceptable}`;
+
+					return listed += `${acceptable}, `;
+				});
+
+				super(propName, propIndex, `must be ${listed}`, label);
+			}
+		}
+	}
+
+	get name () { return "PropertyNotAcceptableError" }
+}
+
+/**
+ * プロパティの定義が必須である事を示します
+ * 
+ * @extends PropertyError
+ * @author Genbu Hase
+ */
+class PropertyNotDefinedError extends PropertyError {
+	/**
+	 * PropertyNotDefinedErrorを生成します
+	 * 
+	 * @param {String} propName プロパティ名
+	 * @param {Number} [propIndex] プロパティのインデックス
+	 * @param {PropertyError.Label} [label=PropertyError.Label] プロパティのラベル定義
+	 */
+	constructor (propName, propIndex, label = PropertyError.Label) { super(propName, propIndex, "is required", label) }
+
+	get name () { return "PropertyNotDefinedError" }
+}
+
 
 
 /**
@@ -70,10 +126,10 @@ class ArgumentError extends PropertyError {
 /**
  * 許容されない引数型である事を示します
  * 
- * @extends ArgumentError
+ * @extends PropertyNotAcceptableError
  * @author Genbu Hase
  */
-class ArgumentNotAcceptableError extends ArgumentError {
+class ArgumentNotAcceptableError extends PropertyNotAcceptableError {
 	/**
 	 * ArgumentNotAcceptableErrorを生成します
 	 * 
@@ -81,27 +137,7 @@ class ArgumentNotAcceptableError extends ArgumentError {
 	 * @param {Number} [argIndex] 引数のインデックス
 	 * @param {String | Array<String>} [acceptables] 許容される引数型名
 	 */
-	constructor (argName, argIndex, acceptables) {
-		if (!acceptables) {
-			super(argName, argIndex, "is not acceptable");
-		} else {
-			//must be String
-			//must be String, Number, or Array
-
-			if (!Array.isArray(acceptables) || (Array.isArray(acceptables) && acceptables.length === 1)) {
-				super(argName, argIndex, `must be ${acceptables}`);
-			} else {
-				let listed = "";
-				acceptables.forEach((acceptable, index) => {
-					if (index === acceptables.length - 1) return listed += `or ${acceptable}`;
-
-					return listed += `${acceptable}, `;
-				});
-
-				super(argName, argIndex, `must be ${listed}`);
-			}
-		}
-	}
+	constructor (argName, argIndex, acceptables) { super(argName, argIndex, acceptables, ArgumentError.Label) }
 
 	get name () { return "ArgumentNotAcceptableError" }
 }
@@ -109,17 +145,17 @@ class ArgumentNotAcceptableError extends ArgumentError {
 /**
  * 引数の定義が必須である事を示します
  * 
- * @extends ArgumentError
+ * @extends PropertyNotDefinedError
  * @author Genbu Hase
  */
-class ArgumentNotDefinedError extends ArgumentError {
+class ArgumentNotDefinedError extends PropertyNotDefinedError {
 	/**
 	 * ArgumentNotDefinedErrorを生成します
 	 * 
 	 * @param {String} argName 引数名
 	 * @param {Number} [argIndex] 引数のインデックス
 	 */
-	constructor (argName, argIndex) { super(argName, argIndex, "is required") }
+	constructor (argName, argIndex) { super(argName, argIndex, ArgumentError.Label) }
 
 	get name () { return "ArgumentNotDefinedError" }
 }
@@ -151,19 +187,75 @@ class EnvironmentError extends PropertyError {
 /**
  * 環境変数の定義が必須である事を示します
  * 
- * @extends EnvironmentError
+ * @extends PropertyNotDefinedError
  * @author Genbu Hase
  */
-class EnvironmentNotDefinedError extends EnvironmentError {
+class EnvironmentNotDefinedError extends PropertyNotDefinedError {
 	/**
 	 * EnvironmentNotDefinedErrorを生成します
-	 * 
 	 * @param {String} envName 環境変数名
-	 * @param {Number} [envIndex] 環境変数のインデックス
 	 */
-	constructor (envName) { super(envName, "is required") }
+	constructor (envName) { super(envName, null, EnvironmentError.Label) }
 
 	get name () { return "EnvironmentNotDefinedError" }
+}
+
+
+
+/**
+ * APIのペイロードに関するエラー
+ * 
+ * @extends PropertyError
+ * @author Genbu Hase
+ */
+class PayloadError extends PropertyError {
+	static get Label () { return { single: "Payload", multi: "Payloads" } }
+
+
+
+	/**
+	 * PayloadErrorを生成します
+	 * 
+	 * @param {String} payloadName ペイロード名
+	 * @param {String} [description=""] エラー文(ex: "<'TEST' | One of Payloads> "に繋がります)
+	 */
+	constructor (payloadName, description = "") { super(payloadName, null, description, PayloadError.Label) }
+
+	get name () { return "PayloadError" }
+}
+
+/**
+ * 許容されないペイロード型である事を示します
+ * 
+ * @extends PropertyNotAcceptableError
+ * @author Genbu Hase
+ */
+class PayloadNotAcceptableError extends PropertyNotAcceptableError {
+	/**
+	 * PayloadNotAcceptableErrorを生成します
+	 * 
+	 * @param {String} payloadName ペイロード名
+	 * @param {String | Array<String>} [acceptables] 許容されるペイロード型名
+	 */
+	constructor (payloadName, acceptables) { super(payloadName, null, acceptables, PayloadError.Label) }
+
+	get name () { return "PayloadNotAcceptableError" }
+}
+
+/**
+ * ペイロードが必須である事を示します
+ * 
+ * @extends PropertyNotDefinedError
+ * @author Genbu Hase
+ */
+class PayloadNotDefinedError extends PropertyNotDefinedError {
+	/**
+	 * PayloadNotDefinedErrorを生成します
+	 * @param {String} payloadName ペイロード名
+	 */
+	constructor (payloadName) { super(payloadName, null, PayloadError.Label) }
+
+	get name () { return "PayloadNotDefinedError" }
 }
 
 
@@ -174,5 +266,9 @@ module.exports = {
 	ArgumentNotDefinedError,
 
 	EnvironmentError,
-	EnvironmentNotDefinedError
+	EnvironmentNotDefinedError,
+
+	PayloadError,
+	PayloadNotAcceptableError,
+	PayloadNotDefinedError
 };
