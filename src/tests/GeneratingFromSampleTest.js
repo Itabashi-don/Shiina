@@ -19,10 +19,17 @@ const readingQues = [];
 
 for (const type of ["both", "vocabulary", "structure"]) {
 	const dir = `${sampleRootDir}/${type}`;
+	if (!fs.existsSync(dir)) fsEx.mkdirsSync(dir);
+	
 	const files = fs.readdirSync(dir);
 
 	const ques = [];
-	for (const file of files) ques.push(fsEx.readJSON(`${dir}/${file}`));
+	for (const file of files) {
+		const parseQue = fsEx.readJSON(`${dir}/${file}`);
+		parseQue.then(() => console.info(`${file} had been loaded`));
+
+		ques.push(parseQue);
+	}
 
 	readingQues.push(
 		Promise.all(ques).then(databases => {

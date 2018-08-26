@@ -67,7 +67,9 @@ class Tokenizer {
 
 		const { self } = this;
 
-		text = text.replace(/(?:\r?\n)+(?=\r?\n)/g, "");
+		text = text
+			.replace(/(?:\r?\n)+(?=\r?\n)/g, "")
+			.replace(/(。)(?:\r?\n)*(?:\r?\n)/g, "$1");
 			
 
 		if (isMultiLine) {
