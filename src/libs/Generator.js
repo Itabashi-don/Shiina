@@ -53,13 +53,13 @@ class Generator {
 		const { dictionary } = this;
 
 		const nounDic = dictionary.vocabularies.orderBy({ pos: "名詞" });
-		//const verbDic = dictionary.vocabularies.orderBy({ pos: "動詞" });
+		const verbDic = dictionary.vocabularies.orderBy({ pos: "動詞" });
 
 		const structureBase = structure.length ? structure : dictionary.structures.pickUp();
 		
 		let sentence = "";
 		for (const token of structureBase) {
-			const { pos, pos_detail_1, pos_detail_2, pos_detail_3 } = token;
+			const { pos, pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form } = token;
 
 			switch (true) {
 				default:
@@ -70,9 +70,9 @@ class Generator {
 					sentence += nounDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
 					break;
 
-				/*case pos === "動詞":
-					sentence += verbDic.pickUp().surface_form;
-					break;*/
+				case pos === "動詞":
+					sentence += verbDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form }).pickUp().surface_form;
+					break;
 			}
 		}
 

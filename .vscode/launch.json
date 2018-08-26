@@ -50,7 +50,7 @@
 			"env": {
 				"SHIINA_ENV": "development",
 				"SHIINA_MODE": "",
-				"SHIINA_DBPATH": "db/kantei.go.jp/20180720_安倍内閣総理大臣記者会見.txt"
+				"SHIINA_DBPATH": "db/kantei.go.jp/20180720kaiken.db"
 			}
 		}
 	]

@@ -4,8 +4,8 @@
 
 ```Json
 {
-  "createdAt": [2018, 7, 30],
-  "updatedAt": [2018, 7, 30]
+	"createdAt": [2018, 7, 30],
+	"updatedAt": [2018, 7, 30]
 }
 ```
 

@@ -67,6 +67,9 @@ class Tokenizer {
 
 		const { self } = this;
 
+		text = text.replace(/(?:\r?\n)+(?=\r?\n)/g, "");
+			
+
 		if (isMultiLine) {
 			const tokenizedCollection = [];
 			const delimiterMatcher = /(\r?\n|。(?:\r?\n)?)/g;
