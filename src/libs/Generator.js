@@ -50,19 +50,16 @@ class Generator {
 	 * @return {String} 生成された文章
 	 */
 	generate (vocabulary = "", structure = []) {
-		const { dictionary } = this;
+		const { vocabularies, structures, connections } = this.dictionary;
 
-		const nounDic = dictionary.vocabularies.orderBy({ pos: "名詞" });
-		const verbDic = dictionary.vocabularies.orderBy({ pos: "動詞" });
-
-		const structureBase = structure.length ? structure : dictionary.structures.pickUp();
+		const structureBase = structure.length ? structure : structures.pickUp();
 		
 		let sentence = "";
 		structureBase.forEach((token, index) => {
 			const { pos, pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form } = token;
 
 			const vocabDic = new VocabularyDictionary();
-			if (0 < index) vocabDic.register(dictionary.connections.get(structureBase[index - 1]));
+			if (0 < index) vocabDic.register(connections.get(structureBase[index - 1]));
 
 			let result = "";
 			switch (true) {
@@ -70,20 +67,26 @@ class Generator {
 					result = token.surface_form;
 					break;
 
-				case pos === "名詞" && !["数", "接尾"].includes(pos_detail_1):
-					if (vocabDic.orderBy({ pos, pos_detail_1, pos_detail_2, pos_detail_3 }).length) {
-						result = vocabDic.orderBy({ pos, pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
-					} else {
-						result = nounDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
-					}
-
+				case pos === "名詞" && pos_detail_1 === "代名詞":
+					result = vocabularies.orderBy(vocab => {
+						return (
+							vocab.pos === pos &&
+							
+							(
+								vocab.pos_detail_1 === pos_detail_1 ||
+								(vocab.pos_detail_1 === "固有名詞" && vocab.pos_detail_2 === "人名")
+							)
+						);
+					}).pickUp().surface_form;
+					
 					break;
 
-				case pos === "動詞":
+				case pos === "名詞" && !["数", "接尾"].includes(pos_detail_1):
+				//case pos === "動詞":
 					if (vocabDic.orderBy({ pos, pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form }).length) {
 						result = vocabDic.orderBy({ pos, pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form }).pickUp().surface_form;
 					} else {
-						result = verbDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form }).pickUp().surface_form;
+						result = vocabularies.orderBy({ pos, pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form }).pickUp().surface_form;
 					}
 
 					break;
@@ -214,8 +217,8 @@ class StructureDictionary extends Array {
  * 語彙間連結データの辞書
  * @author Genbu Hase
  */
-class ConnectionDictionary {
-	constructor () { }
+class ConnectionDictionary extends Object {
+	constructor () { super() }
 
 	/**
 	 * 指定された語彙の語彙間連結データを初期化します

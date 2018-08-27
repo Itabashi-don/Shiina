@@ -136,6 +136,19 @@ Promise.all([ dialogue.on("initialized"), tokenizer.on("initialized") ]).then(()
 		res.end(JSON.stringify({ tokenized, propers }));
 	});
 
+	app.get("/api/state", (req, res) => {
+		const { dictionary } = generator;
+
+		res.end(JSON.stringify({
+			environment: ENV,
+
+			dictionary: {
+				vocabulary_quantity: dictionary.vocabularies.length,
+				structure_quantity: dictionary.structures.length
+			}
+		}));
+	});
+
 	return app;
 }).then(app => {
 	app.listen(ENV.SHIINA_PORT, () => {

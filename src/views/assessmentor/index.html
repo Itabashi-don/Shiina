@@ -1,0 +1,63 @@
+<!DocType HTML>
+
+<HTML>
+	<Head>
+		<Meta Charset = "UTF-8" />
+		<Link Rel = "Icon" Href = "/assets/favicon32.png" Sizes = "32x32" />
+		<Link Rel = "Icon" Href = "/assets/favicon64.png" Sizes = "64x64" />
+		<Link Rel = "Icon" Href = "/assets/favicon128.png" Sizes = "128x128" />
+		<Link Rel = "Icon" Href = "/assets/favicon192.png" Sizes = "192x192" />
+		<Link Rel = "Icon" Href = "/assets/favicon256.png" Sizes = "256x256" />
+		<Title>Assessmentor | Shiina Debugger Portal</Title>
+
+		<Link Rel = "StyleSheet" Href = "/libs/common.css" />
+		<Link Rel = "StyleSheet" Href = "/libs/materialize.min.css"/>
+		<Link Rel = "StyleSheet" Href = "assessmentor.css" />
+		
+		<Script Src = "/libs/materialize.min.js"></Script>
+		<Script Src = "assessmentor.js" Defer></Script>
+	</Head>
+	
+	<Body>
+		<Header Class = "navbar-fixed">
+			<Nav>
+				<Div Class = "nav-wrapper">
+					<Span Class = "brand-logo center">Assessmentor | Shiina Debugger Portal</Span>
+				</Div>
+			</Nav>
+		</Header>
+
+		<Main ID = "assessmentor"">
+			<Div Class = "input-field">
+				<Textarea ID = "tokenizer-text" Class = "materialize-textarea"></Textarea>
+				<Label For = "tokenizer-text">生成されたログを入力してください</Label>
+
+				<Button ID = "tokenizer-tokenize" Class = "btn waves-effect waves-light">評価開始</Button>
+			</Div>
+
+			<Table ID = "tokenizer-result" Class = "highlight responsive-table">
+				<THead>
+					<Tr>
+						<Th>word_id</Th>
+						<Th>word_type</Th>
+						<Th>word_position</Th>
+						<Th>surface_form</Th>
+						<Th>pos</Th>
+						<Th>pos_detail_1</Th>
+						<Th>pos_detail_2</Th>
+						<Th>pos_detail_3</Th>
+						<Th>conjugated_type</Th>
+						<Th>conjugated_form</Th>
+						<Th>basic_form</Th>
+						<Th>reading</Th>
+						<Th>pronunciation</Th>
+						<Th>feeling</Th>
+					</Tr>
+				</THead>
+
+				<TBody>
+				</TBody>
+			</Table>
+		</Main>
+	</Body>
+</HTML>
