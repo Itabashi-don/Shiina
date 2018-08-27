@@ -29,5 +29,9 @@
 学習状況を保存するファイルのパス
 
 
+### SHIINA_DICPATH(String型) <初期値: `"dict"`>
+形態素解析に用いる辞書のディレクトリパス
+
+
 ### SHIINA_PORT(Number型) <初期値: `8001`>
 Shiinaを動かすポート

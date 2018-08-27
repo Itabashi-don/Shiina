@@ -24,7 +24,7 @@ const parseHtml = htmlStr => {
 /** @type {Initializer.ShiinaEnv} */
 const ENV = process.env;
 
-const tokenizer = new Tokenizer({ dicPath: `${ENV.SHIINA_HOMEDIR}/dict` });
+const tokenizer = new Tokenizer({ dicPath: `${ENV.SHIINA_HOMEDIR}/${ENV.SHIINA_DICPATH}` });
 const logger = new Logger.AsyncArrayLogger(`${ENV.SHIINA_HOMEDIR}/db/aozorabunko.db`);
 
 Promise.all([tokenizer.on("initialized"), logger.on("initialized")]).then(() => {

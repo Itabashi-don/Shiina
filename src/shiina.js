@@ -19,7 +19,7 @@ const Notification = require("./models/Notification");
 const ENV = process.env;
 
 const dialogue = new Logger.AsyncArrayLogger(`${ENV.SHIINA_HOMEDIR}/${ENV.SHIINA_DBPATH}`);
-const tokenizer = new Tokenizer({ dicPath: `${ENV.SHIINA_HOMEDIR}/dict` });
+const tokenizer = new Tokenizer({ dicPath: `${ENV.SHIINA_HOMEDIR}/${ENV.SHIINA_DICPATH}` });
 const generator = new Generator();
 
 const mstdn = new Mastodon({ api_url: `${ENV.SHIINA_INSTANCE}/api/v1/`, access_token: ENV.SHIINA_TOKEN });

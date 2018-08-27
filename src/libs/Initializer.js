@@ -1,4 +1,5 @@
 const fs = require("fs");
+const fsEx = require("fs-extra");
 const { EnvironmentNotDefinedError } = require("./ShiinaError");
 
 
@@ -13,6 +14,7 @@ class Environment {
 		self.SHIINA_ENV = self.SHIINA_ENV || "production";
 		self.SHIINA_MODE = (self.SHIINA_ENV === "development" && self.SHIINA_MODE) || "";
 		self.SHIINA_DBPATH = self.SHIINA_DBPATH || "db/dialogue.db";
+		self.SHIINA_DICPATH = self.SHIINA_DICPATH || "dict";
 		self.SHIINA_PORT = self.SHIINA_PORT || 8001;
 		
 		if (self.SHIINA_ENV === "development") require("dotenv").config();
@@ -30,6 +32,7 @@ class Environment {
  * @prop {"production" | "development"} [SHIINA_ENV="production"] 動作環境
  * @prop {"" | "learning" | "debug"} [SHIINA_MODE=""] 動作モード
  * @prop {String} [SHIINA_DBPATH="db/dialogue.db"] 学習状況を保存するファイルのパス
+ * @prop {String} [SHIINA_DICPATH="dict"] 形態素解析に用いる辞書のディレクトリパス
  * @prop {Number} [SHIINA_PORT=8001] Shiinaを動かすポート
  */
 
@@ -50,16 +53,16 @@ class DirStructure {
 		const HOMEDIR = process.cwd();
 		const { DIRS, FILES, JSONS } = DirStructure;
 
-		for (let dir of DIRS) if (!fs.existsSync(`${HOMEDIR}/${dir}`)) fs.mkdirSync(`${HOMEDIR}/${dir}`);
-		for (let file of FILES) if (!fs.existsSync(`${HOMEDIR}/${file}`)) fs.appendFileSync(`${HOMEDIR}/${file}`, "");
+		for (let dir of DIRS) if (!fs.existsSync(`${HOMEDIR}/${dir}`)) fsEx.mkdirsSync(`${HOMEDIR}/${dir}`);
+		for (let file of FILES) if (!fs.existsSync(`${HOMEDIR}/${file}`)) fsEx.createFileSync(`${HOMEDIR}/${file}`);
 
 		for (let type in JSONS) {
 			for (let json of JSONS[type]) {
 				if (fs.existsSync(`${HOMEDIR}/${json}`)) return;
 
 				switch (type) {
-					case "Object": return fs.appendFileSync(`${HOMEDIR}/${json}`, "{}");
-					case "Array": return fs.appendFileSync(`${HOMEDIR}/${json}`, "[]");
+					case "Object": return fs.writeFileSync(`${HOMEDIR}/${json}`, "{}");
+					case "Array": return fs.writeFileSync(`${HOMEDIR}/${json}`, "[]");
 				}
 			}
 		}

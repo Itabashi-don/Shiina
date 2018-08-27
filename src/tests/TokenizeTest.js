@@ -13,7 +13,7 @@ const inFile = ENV.IN_PATH.split("/").slice(-1).join("");
 const inFileName = inFile.split(".").slice(0, -1).join("");
 const outDir = ENV.OUT_DIR ? `${ENV.OUT_DIR}/` : "";
 
-const tokenizer = new Tokenizer({ dicPath: `${ENV.SHIINA_HOMEDIR}/dict` });
+const tokenizer = new Tokenizer({ dicPath: `${ENV.SHIINA_HOMEDIR}/${ENV.SHIINA_DICPATH}` });
 const logger = new AsyncArrayLogger(`${ENV.SHIINA_HOMEDIR}/db/${outDir}${inFileName}.db`);
 
 Promise.all([ tokenizer.on("initialized"), logger.on("initialized") ]).then(([ tokenizer, logger ]) => {

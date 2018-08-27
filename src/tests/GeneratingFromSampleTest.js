@@ -64,10 +64,10 @@ Promise.all(readingQues).then(() => {
 
 		console.log(status);
 
-		/*mstdn.post("statuses", {
+		mstdn.post("statuses", {
 			status,
 			visibility: "private"
-		});*/
+		});
 	}
 
 	process.kill(process.pid);
