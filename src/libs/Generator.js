@@ -60,7 +60,9 @@ class Generator {
 		let sentence = "";
 		structureBase.forEach((token, index) => {
 			const { pos, pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form } = token;
+
 			const vocabDic = new VocabularyDictionary();
+			if (0 < index) vocabDic.register(dictionary.connections.get(structureBase[index - 1]));
 
 			let result = "";
 			switch (true) {
@@ -69,8 +71,6 @@ class Generator {
 					break;
 
 				case pos === "名詞" && !["数", "接尾"].includes(pos_detail_1):
-					if (0 < index) vocabDic.register([ dictionary.connections.pickUp(structureBase[index - 1].surface_form) ]);
-
 					if (vocabDic.orderBy({ pos, pos_detail_1, pos_detail_2, pos_detail_3 }).length) {
 						result = vocabDic.orderBy({ pos, pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
 					} else {
@@ -80,13 +80,10 @@ class Generator {
 					break;
 
 				case pos === "動詞":
-					// 後方参照も含める
-					if (0 < index) vocabDic.register([ dictionary.connections.pickUp(structureBase[index - 1].surface_form) ]);
-
-					if (vocabDic.orderBy({ pos, pos_detail_1, pos_detail_2, pos_detail_3 }).length) {
-						result = vocabDic.orderBy({ pos, pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
+					if (vocabDic.orderBy({ pos, pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form }).length) {
+						result = vocabDic.orderBy({ pos, pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form }).pickUp().surface_form;
 					} else {
-						result = verbDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3 }).pickUp().surface_form;
+						result = verbDic.orderBy({ pos_detail_1, pos_detail_2, pos_detail_3, conjugated_type, conjugated_form }).pickUp().surface_form;
 					}
 
 					break;
@@ -221,34 +218,61 @@ class ConnectionDictionary {
 	constructor () { }
 
 	/**
+	 * 指定された語彙の語彙間連結データを初期化します
+	 * @param {ConnectionDictionary.Vocabulary} vocabulary 関連付いた語彙
+	 */
+	init (vocabulary = "") {
+		if (typeof vocabulary === "string") return this[vocabulary] = [];
+		return this[vocabulary.surface_form] = [];
+	}
+
+	/**
+	 * 指定された語彙に関連付けられた語彙を返します
+	 * 
+	 * @param {ConnectionDictionary.Vocabulary} [vocabulary=""] 関連付いた語彙
+	 * @return {Kuromoji.IpadicFeatures[] | null}
+	 */
+	get (vocabulary = "") {
+		if (typeof vocabulary === "string") return this[vocabulary] || null;
+		return this[vocabulary.surface_form] || null;
+	}
+
+	/**
+	 * 指定された語彙に関連付けられた語彙が存在するかどうか返します
+	 * 
+	 * @param {ConnectionDictionary.Vocabulary} [vocabulary=""] 関連付いた語彙
+	 * @return {Boolean}
+	 */
+	isAvailable (vocabulary = "") { return (this.get(vocabulary) && this.get(vocabulary).length) || false }
+
+	/**
 	 * 語彙間連結データを登録します
 	 * @param {Kuromoji.IpadicFeatures[]} tokenized 文章の形態素解析結果
 	 */
 	register (tokenized) {
+		if (!tokenized.length) return;
+
 		tokenized.reduce((prev, now) => {
-			if (!this[prev.surface_form]) this[prev.surface_form] = [];
-			this[prev.surface_form].push(now);
+			if (!this.get(prev)) this.init(prev);
+			this.get(prev).push(now);
 
 			return now;
 		});
 	}
 
 	/**
-	 * 指定された語彙に関連付けられた語彙が存在するかどうか返します
-	 * 
-	 * @param {String} [vocabulary=""] 関連付いた語彙
-	 * @return {Boolean}
-	 */
-	isAvailable (vocabulary = "") { return this[vocabulary] && this[vocabulary].length }
-
-	/**
 	 * 指定された語彙に関連付けられた語彙をランダムで抽出します
 	 * 
-	 * @param {String} [vocabulary=""] 関連付いた語彙
-	 * @return {Kuromoji.IpadicFeatures[]}
+	 * @param {ConnectionDictionary.Vocabulary} [vocabulary=""] 関連付いた語彙
+	 * @return {Kuromoji.IpadicFeatures[] | null}
 	 */
-	pickUp (vocabulary = "") { return this.isAvailable(vocabulary) && this[vocabulary][Math.floor(Math.random() * this[vocabulary].length)] }
+	pickUp (vocabulary = "") { return (this.isAvailable(vocabulary) && this.get(vocabulary)[ Math.floor(Math.random() * this.get(vocabulary).length) ]) || null }
 }
+
+/**
+ * 語彙間連結辞書における、関連付いた語彙のオブジェクト
+ * @typedef {String | Kuromoji.IpadicFeatures} ConnectionDictionary.Vocabulary
+ */
 
 
 

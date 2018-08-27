@@ -1,7 +1,6 @@
 # 環境変数(Environments)
 
 
-
 ### SHIINA_INSTANCE(String型)
 動作させるアカウントがあるインスタンスのURL(ex: https://itabashi.0j0.jp)
 
