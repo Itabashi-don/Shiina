@@ -1,0 +1,9 @@
+#enquete-form {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+}
+
+#enquete-form > * {
+	width: 45%;
+}

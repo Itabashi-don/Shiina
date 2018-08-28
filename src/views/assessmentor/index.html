@@ -27,37 +27,45 @@
 			</Nav>
 		</Header>
 
-		<Main ID = "assessmentor"">
+		<Main ID = "assessmentor">
 			<Div Class = "input-field">
-				<Textarea ID = "tokenizer-text" Class = "materialize-textarea"></Textarea>
-				<Label For = "tokenizer-text">生成されたログを入力してください</Label>
+				<Textarea ID = "assessmentor-log" Class = "materialize-textarea"></Textarea>
+				<Label For = "assessmentor-log">生成されたログを入力してください</Label>
 
-				<Button ID = "tokenizer-tokenize" Class = "btn waves-effect waves-light">評価開始</Button>
+				<Button ID = "assessmentor-start" Class = "btn waves-effect waves-light">評価開始</Button>
+			</Div>
+		</Main>
+
+		<Div ID = "enquete" Class = "modal" Data-Index = "0">
+			<Div Class = "modal-content">
+				<P ID = "enquete-text"></P>
+
+				<Div ID = "enquete-form">
+					<Div ID = "enquete-form-vocabulary">
+						<Span>語彙</Span>
+
+						<P Class = "range-field">
+							<Input ID = "enquete-form-vocabulary-point" Type = "Range" Min = "1" Max = "3" />
+						</P>
+
+						<P ID = "enquete-form-vocabulary-description"></P>
+					</Div>
+
+					<Div ID = "enquete-form-structure">
+						<Span>文法構造</Span>
+
+						<P Class = "range-field">
+							<Input ID = "enquete-form-structure-point" Type = "Range" Min = "1" Max = "3" />
+						</P>
+
+						<P ID = "enquete-form-structure-description"></P>
+					</Div>
+				</Div>
 			</Div>
 
-			<Table ID = "tokenizer-result" Class = "highlight responsive-table">
-				<THead>
-					<Tr>
-						<Th>word_id</Th>
-						<Th>word_type</Th>
-						<Th>word_position</Th>
-						<Th>surface_form</Th>
-						<Th>pos</Th>
-						<Th>pos_detail_1</Th>
-						<Th>pos_detail_2</Th>
-						<Th>pos_detail_3</Th>
-						<Th>conjugated_type</Th>
-						<Th>conjugated_form</Th>
-						<Th>basic_form</Th>
-						<Th>reading</Th>
-						<Th>pronunciation</Th>
-						<Th>feeling</Th>
-					</Tr>
-				</THead>
-
-				<TBody>
-				</TBody>
-			</Table>
-		</Main>
+			<Div CLass = "modal-footer">
+				<Button ID = "enquete-next" Class = "btn-flat waves-effect waves-green modal-close">Next</a>
+			</Div>
+		</Div>
 	</Body>
 </HTML>
