@@ -1,3 +1,17 @@
+/**
+ * Learning | Mastodon
+ * 
+ * [Environments]
+ * SHIINA_ENV*
+ * > SHIINA_INSTANCE*
+ * > SHIINA_TOKEN*
+ * 
+ * SHIINA_DBPATH*: 解析結果の保存先
+ * USER_ID*: 収集するユーザーのID
+ */
+
+
+
 const Mastodon = require("mastodon-api");
 
 const Initializer = require("./../../libs/Initializer");
@@ -44,30 +58,28 @@ logger.on("initialized").then(() => {
 		console.log("[tokenizer] Initialized");
 		
 		(function looper (max_id) {
-			mstdn.get("accounts/2/statuses", { limit: 40, max_id }).then(res => {
+			mstdn.get(`accounts/${ENV.USER_ID}/statuses`, { limit: 40, max_id }).then(res => {
+				/** @type {Array<Types.Statusable>} */
 				const statuses = res.data;
-				
-				statuses.forEach(
-					/** @param {Types.Statusable} statusable */
-					statusable => {
-						const status = new MorphableStatus(statusable);
-						const { morphableContent, reblog, application, tags } = status;
-						
-						if (reblog) return;
-						if (application && application.name === "toot counter") return;
-						if (tags && tags.some(tag => tag.name === "whatyouareplaying" || tag.name === "nowplaying" || tag.name === "mastodononemail" || tag.name === "mastodonrater")) return;
 
-						logger.put(tokenizer.tokenize(morphableContent.replace(/\s/g, "")));
-					}
-				);
+				for (const statusable of statuses) {
+					const status = new MorphableStatus(statusable);
+					const { morphableContent, reblog, application, tags } = status;
+					
+					if (reblog) continue;
+					if (application && application.name === "toot counter") continue;
+					if (tags && tags.some(tag => tag.name === "whatyouareplaying" || tag.name === "nowplaying" || tag.name === "mastodononemail" || tag.name === "mastodonrater")) continue;
+					if (morphableContent.match(/~~~~~~~~~~/)) continue;
+
+					logger.put(tokenizer.tokenize(morphableContent.replace(/\s/g, "")));
+				}
+
+				console.log(`Imported: ${logger.log.length} toots`);
 
 				const nextLink = Formatter.getLinkFromLinkHeader(res.resp.headers.link, "next");
-
+				
 				if (nextLink) {
-					const nextId = Formatter.queriesToObject(nextLink).max_id;
-
-					console.info(nextId);
-					looper(nextId);
+					looper(Formatter.queriesToObject(nextLink).max_id);
 				}
 			});
 		})("");

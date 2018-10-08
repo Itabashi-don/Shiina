@@ -1,10 +1,21 @@
+/**
+ * Generating | Mastodon
+ * 
+ * [Environments]
+ * SHIINA_ENV*
+ * > SHIINA_INSTANCE*
+ * > SHIINA_TOKEN*
+ */
+
+
+
 const fs = require("fs");
 const fsEx = require("fs-extra");
 const Mastodon = require("mastodon-api");
 
-const Initializer = require("./../libs/Initializer");
-const Logger = require("./../libs/Logger");
-const Generator = require("./../libs/Generator");
+const Initializer = require("./../../libs/Initializer");
+const Logger = require("./../../libs/Logger");
+const Generator = require("./../../libs/Generator");
 
 
 

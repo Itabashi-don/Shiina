@@ -45,7 +45,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "GeneratingTest",
-			"program": "${workspaceFolder}/src/tests/GeneratingTest.js",
+			"program": "${workspaceFolder}/src/tests/Generating/GeneratingTest.js",
 
 			"env": {
 				"SHIINA_ENV": "development",
@@ -58,7 +58,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "GeneratingFromSampleTest",
-			"program": "${workspaceFolder}/src/tests/GeneratingFromSampleTest.js",
+			"program": "${workspaceFolder}/src/tests/Generating/GeneratingFromSampleTest.js",
 
 			"env": {
 				"SHIINA_ENV": "development",
