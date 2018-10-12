@@ -44,6 +44,20 @@
 		{
 			"type": "node",
 			"request": "launch",
+			"name": "Learning from Mastodon",
+			"program": "${workspaceFolder}/src/tests/Learning/Mastodon.js",
+
+			"env": {
+				"SHIINA_ENV": "development",
+				"SHIINA_MODE": "",
+				"SHIINA_DBPATH": "db/Mastodon/ars42525@odakyu.app.db",
+				"USER_ID": "8413"
+			}
+		},
+
+		{
+			"type": "node",
+			"request": "launch",
 			"name": "GeneratingTest",
 			"program": "${workspaceFolder}/src/tests/Generating/GeneratingTest.js",
 

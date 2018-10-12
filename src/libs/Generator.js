@@ -21,7 +21,7 @@ const Kuromoji = require("kuromoji");
 class Generator {
 	/**
 	 * Generatorを生成します
-	 * @param {Kuromoji.IpadicFeatures[][]} dbData 取り込む形態素解析データ
+	 * @param {Array<Kuromoji.IpadicFeatures[]>} dbData 取り込む形態素解析データ
 	 */
 	constructor (dbData) {
 		/**
@@ -35,7 +35,7 @@ class Generator {
 
 	/**
 	 * 形態素解析データを取り込みます
-	 * @param {Kuromoji.IpadicFeatures[][]} dbData 取り込む形態素解析データ
+	 * @param {Array<Kuromoji.IpadicFeatures[]>} dbData 取り込む形態素解析データ
 	 */
 	importDatabase (dbData) {
 		for (const tokenized of dbData) this.dictionary.register(tokenized);
@@ -217,16 +217,19 @@ class StructureDictionary extends Array {
  * 語彙間連結データの辞書
  * @author Genbu Hase
  */
-class ConnectionDictionary extends Object {
-	constructor () { super() }
+class ConnectionDictionary {
+	constructor () {
+		/** @type {Object<string, Array<Kuromoji.IpadicFeatures[]>>} */
+		this.connections = {};
+	}
 
 	/**
 	 * 指定された語彙の語彙間連結データを初期化します
 	 * @param {ConnectionDictionary.Vocabulary} vocabulary 関連付いた語彙
 	 */
 	init (vocabulary = "") {
-		if (typeof vocabulary === "string") return this[vocabulary] = [];
-		return this[vocabulary.surface_form] = [];
+		if (typeof vocabulary === "string") return this.connections[vocabulary] = [];
+		return this.connections[vocabulary.surface_form] = [];
 	}
 
 	/**
@@ -236,8 +239,8 @@ class ConnectionDictionary extends Object {
 	 * @return {Kuromoji.IpadicFeatures[] | null}
 	 */
 	get (vocabulary = "") {
-		if (typeof vocabulary === "string") return this[vocabulary] || null;
-		return this[vocabulary.surface_form] || null;
+		if (typeof vocabulary === "string") return this.connections[vocabulary] || null;
+		return this.connections[vocabulary.surface_form] || null;
 	}
 
 	/**
