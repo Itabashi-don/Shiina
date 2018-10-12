@@ -7,6 +7,7 @@
  * > SHIINA_TOKEN*
  * 
  * SHIINA_DBPATH: DB保存先
+ * DOES_TOOT: トゥートするかしないか
  */
 
 
