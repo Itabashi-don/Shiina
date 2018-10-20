@@ -1,5 +1,5 @@
-# しいな ― Shiina
-![](/docs/assets/Shiina.jpg)
+# <Img Alt="" Src="/docs/assets/Shiina002.jpg" Height="48" Align="Center" /> しいな ― Shiina
+![](/docs/assets/Shiina001.jpg)
 
 板橋在住の女子高生、しいちゃんです。
 
@@ -9,8 +9,8 @@
 
 
 ## 自己紹介っ！ | Description
-みなさん初めまして。椎名です。<Br />
-しいちゃん、って呼んで下さいねっ？|ू･ω･` )
+みなさん初めまして、椎名ですっ！<Br />
+「しいちゃん」って呼んで下さいねっ？|ू･ω･` )
 
 ※このプロジェクトは研究用のため、多少の不具合・バグが残っている可能性があります。
 

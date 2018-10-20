@@ -1,5 +1,5 @@
-# Shiina
-![](/docs/assets/Shiina.jpg)
+# <Img Alt="" Src="/docs/assets/Shiina002.jpg" Height="48" Align="Center" /> Shiina
+![](/docs/assets/Shiina001.jpg)
 
 I'm a girl, named "Shiina", living in Itabashi.
 
@@ -10,7 +10,7 @@ I'm a girl, named "Shiina", living in Itabashi.
 
 ## Description
 Hello, I'm Shiina.<Br />
-Please feel free to call me "Shii-chan" :D
+Please feel free to call me "Shii-chan" :)
 
 ※This project is for investigation and education, so there would be a lot of bugs.
 
